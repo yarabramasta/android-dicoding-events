@@ -1,6 +1,6 @@
-package dev.ybrmst.dicoding_events.feat.event.domain
+package dev.ybrmst.dicoding_events.domain
 
-data class Event(
+data class EventDetail(
   val id: Int,
   val name: String,
   val summary: String,
