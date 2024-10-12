@@ -1,4 +1,4 @@
-package dev.ybrmst.dicoding_events.ui.composables
+package dev.ybrmst.dicoding_events.ui.composables.event
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -23,6 +23,8 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import coil3.compose.AsyncImagePainter
 import dev.ybrmst.dicoding_events.domain.EventPreview
+import dev.ybrmst.dicoding_events.ui.composables.atoms.ShimmerBox
+import dev.ybrmst.dicoding_events.ui.composables.atoms.shimmerBrush
 import dev.ybrmst.dicoding_events.ui.theme.AppTheme
 
 @Composable

@@ -1,4 +1,4 @@
-package dev.ybrmst.dicoding_events.ui.composables
+package dev.ybrmst.dicoding_events.ui.composables.atoms
 
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.RepeatMode

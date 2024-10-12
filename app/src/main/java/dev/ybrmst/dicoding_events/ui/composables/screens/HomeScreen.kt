@@ -1,4 +1,4 @@
-package dev.ybrmst.dicoding_events.ui.composables
+package dev.ybrmst.dicoding_events.ui.composables.screens
 
 
 import androidx.compose.foundation.layout.Box
@@ -14,11 +14,15 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.ybrmst.dicoding_events.domain.EventPreview
+import dev.ybrmst.dicoding_events.ui.composables.event.EventPreviewCard
+import dev.ybrmst.dicoding_events.ui.composables.event.EventPreviewCardFallback
 import dev.ybrmst.dicoding_events.ui.theme.AppTheme
 import dev.ybrmst.dicoding_events.ui.viewmodel.home.HomeEvent
 import dev.ybrmst.dicoding_events.ui.viewmodel.home.HomeViewModel
@@ -26,26 +30,31 @@ import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun HomeScreen(
+  modifier: Modifier = Modifier,
   vm: HomeViewModel = koinViewModel(),
 ) {
+  val state by vm.state.collectAsState()
 
   LaunchedEffect(Unit) {
     vm.add(HomeEvent.OnFetchEvents)
   }
 
-  HomeScreenContent(highlighted = vm.state.highlighted,
-    upcoming = vm.state.upcoming,
-    isLoading = vm.state.isFetching,
+  HomeScreenContent(
+    highlights = state.highlights,
+    events = state.events,
+    isLoading = state.isFetching,
     onCardClick = { event ->
       println("[${event.id}] Event card clicked: $event")
-    })
+    },
+    modifier = modifier
+  )
 }
 
 @Composable
 private fun HomeScreenContent(
   modifier: Modifier = Modifier,
-  highlighted: List<EventPreview>,
-  upcoming: List<EventPreview>,
+  highlights: List<EventPreview>,
+  events: List<EventPreview>,
   isLoading: Boolean,
   onCardClick: (EventPreview) -> Unit,
 ) {
@@ -77,7 +86,7 @@ private fun HomeScreenContent(
     }
     item {
       Text(
-        text = "Highlighted Events",
+        text = "Highlights",
         style = MaterialTheme.typography.titleMedium,
         modifier = Modifier
           .padding(bottom = 8.dp)
@@ -89,7 +98,7 @@ private fun HomeScreenContent(
     }
     item {
       Text(
-        text = "Upcoming Events",
+        text = "Events",
         style = MaterialTheme.typography.titleMedium,
         modifier = Modifier
           .padding(bottom = 8.dp)
@@ -103,7 +112,7 @@ private fun HomeScreenContent(
         }
       }
     } else {
-      if (upcoming.isEmpty()) {
+      if (events.isEmpty()) {
         item {
           Text(
             text = "No upcoming events...",
@@ -120,7 +129,7 @@ private fun HomeScreenContent(
           }
         }
       } else {
-        items(upcoming) { event ->
+        items(events) { event ->
           EventPreviewCard(
             event = event,
             onEventClick = { onCardClick(event) },
@@ -158,13 +167,13 @@ private val events = listOf(
 private fun DefaultStatePreview() {
 
   AppTheme {
-    Scaffold { insetPadding ->
+    Scaffold { innerPadding ->
       HomeScreenContent(
-        highlighted = events,
-        upcoming = events,
+        highlights = events,
+        events = events,
         isLoading = false,
         onCardClick = {},
-        modifier = Modifier.padding(insetPadding)
+        modifier = Modifier.padding(innerPadding)
       )
     }
   }
@@ -175,13 +184,13 @@ private fun DefaultStatePreview() {
 private fun LoadingStatePreview() {
 
   AppTheme {
-    Scaffold { insetPadding ->
+    Scaffold { innerPadding ->
       HomeScreenContent(
-        highlighted = events,
-        upcoming = events,
+        highlights = events,
+        events = events,
         isLoading = true,
         onCardClick = {},
-        modifier = Modifier.padding(insetPadding)
+        modifier = Modifier.padding(innerPadding)
       )
     }
   }
@@ -194,13 +203,13 @@ private fun LoadingStatePreview() {
 private fun EmptyStatePreview() {
 
   AppTheme {
-    Scaffold { insetPadding ->
+    Scaffold { innerPadding ->
       HomeScreenContent(
-        highlighted = emptyList(),
-        upcoming = emptyList(),
+        highlights = emptyList(),
+        events = emptyList(),
         isLoading = false,
         onCardClick = {},
-        modifier = Modifier.padding(insetPadding)
+        modifier = Modifier.padding(innerPadding)
       )
     }
   }
