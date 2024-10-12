@@ -71,4 +71,5 @@ dependencies {
 
   implementation(libs.bundles.retrofit)
   implementation(libs.bundles.koin)
+  implementation(libs.bundles.coil)
 }
