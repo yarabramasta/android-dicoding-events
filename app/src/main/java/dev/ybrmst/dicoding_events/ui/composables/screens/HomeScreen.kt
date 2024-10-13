@@ -148,7 +148,6 @@ private fun LoadingStatePreview() {
         upcomingEvents = emptyList(),
         pastEvents = emptyList(),
         isLoading = true,
-        isError = false,
         modifier = Modifier.padding(it)
       )
     }
@@ -179,7 +178,6 @@ private fun ErrorStatePreview() {
       HomeScreenContent(
         upcomingEvents = emptyList(),
         pastEvents = emptyList(),
-        isLoading = false,
         isError = true,
         modifier = Modifier.padding(it)
       )
