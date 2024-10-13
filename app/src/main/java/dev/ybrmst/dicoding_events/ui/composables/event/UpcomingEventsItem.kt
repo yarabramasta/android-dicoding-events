@@ -2,6 +2,7 @@ package dev.ybrmst.dicoding_events.ui.composables.event
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyListScope
@@ -23,21 +24,24 @@ fun LazyListScope.upcomingEventsItem(
     Text(
       "Upcoming Events",
       style = MaterialTheme.typography.titleMedium,
-      modifier = Modifier.padding(
-        bottom = if (events.isNotEmpty() || isLoading) 16.dp else 8.dp
-      )
+      modifier = Modifier
+        .padding(bottom = if (events.isNotEmpty() || isLoading) 16.dp else 8.dp)
+        .padding(horizontal = 24.dp)
     )
     if (events.isEmpty() && !isLoading) {
       Text(
         "There are no upcoming events.",
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.outline,
-        modifier = Modifier.padding(bottom = 16.dp)
+        modifier = Modifier
+          .padding(bottom = 16.dp)
+          .padding(horizontal = 24.dp)
       )
     }
     LazyRow(
-      contentPadding = PaddingValues(horizontal = 0.dp),
-      horizontalArrangement = Arrangement.spacedBy(24.dp)
+      contentPadding = PaddingValues(horizontal = 24.dp),
+      horizontalArrangement = Arrangement.spacedBy(24.dp),
+      modifier = Modifier.fillMaxWidth(),
     ) {
       if (isLoading) {
         items(5) {
@@ -50,9 +54,7 @@ fun LazyListScope.upcomingEventsItem(
           }
         } else {
           items(events) {
-            ShimmerBox(
-              animate = events.isNotEmpty(), modifier = Modifier.size(200.dp)
-            )
+            FeaturedEventCard(event = it, onClick = onCardClick)
           }
         }
       }

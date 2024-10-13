@@ -2,11 +2,11 @@ package dev.ybrmst.dicoding_events.di
 
 import dev.ybrmst.dicoding_events.data.network.EventsApi
 import dev.ybrmst.dicoding_events.data.network.EventsRepositoryImpl
+import dev.ybrmst.dicoding_events.domain.EventsRepository
 import dev.ybrmst.dicoding_events.ui.viewmodel.home.HomeViewModel
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
-import org.koin.androidx.viewmodel.dsl.viewModelOf
-import org.koin.core.module.dsl.singleOf
+import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -23,9 +23,9 @@ val eventsModule = module {
       .build()
       .create(EventsApi::class.java)
   }
-  singleOf(::EventsRepositoryImpl)
+  single<EventsRepository> { EventsRepositoryImpl(get()) }
 
-  viewModelOf(::HomeViewModel)
+  viewModel { HomeViewModel(get()) }
 }
 
 private fun getHttpClient(): OkHttpClient {

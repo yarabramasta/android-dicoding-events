@@ -16,6 +16,10 @@ class HomeViewModel(private val repo: EventsRepository) : ViewModel() {
 
   val state: StateFlow<HomeState> get() = _state
 
+  init {
+    onFetchEvents()
+  }
+
   fun add(event: HomeEvent) {
     when (event) {
       HomeEvent.OnRefresh -> onRefresh()

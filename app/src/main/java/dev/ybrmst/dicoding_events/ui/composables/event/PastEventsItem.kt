@@ -1,5 +1,6 @@
 package dev.ybrmst.dicoding_events.ui.composables.event
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -20,10 +21,14 @@ fun LazyListScope.pastEventsItem(
         Text(
           "Finished Events",
           style = MaterialTheme.typography.titleMedium,
-          modifier = Modifier.padding(bottom = 8.dp)
+          modifier = Modifier
+            .padding(bottom = 8.dp)
+            .padding(horizontal = 24.dp)
         )
       }
-      EventPreviewCardFallback()
+      Box(modifier = Modifier.padding(horizontal = 8.dp)) {
+        EventPreviewCardFallback()
+      }
     }
   } else {
     if (events.isEmpty()) {
@@ -31,15 +36,21 @@ fun LazyListScope.pastEventsItem(
         Text(
           "Finished Events",
           style = MaterialTheme.typography.titleMedium,
-          modifier = Modifier.padding(bottom = 8.dp)
+          modifier = Modifier
+            .padding(bottom = 8.dp)
+            .padding(horizontal = 24.dp)
         )
         Text(
           "There are no finished events.",
           style = MaterialTheme.typography.bodySmall,
           color = MaterialTheme.colorScheme.outline,
-          modifier = Modifier.padding(bottom = 16.dp)
+          modifier = Modifier
+            .padding(bottom = 16.dp)
+            .padding(horizontal = 24.dp)
         )
-        EventPreviewCardFallback(animate = false)
+        Box(modifier = Modifier.padding(horizontal = 8.dp)) {
+          EventPreviewCardFallback(animate = false)
+        }
       }
     } else {
       itemsIndexed(events) { index, event ->
@@ -47,13 +58,14 @@ fun LazyListScope.pastEventsItem(
           Text(
             "Finished Events",
             style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(bottom = 16.dp)
+            modifier = Modifier
+              .padding(bottom = 8.dp)
+              .padding(horizontal = 24.dp)
           )
         }
-        EventPreviewCard(
-          event = event,
-          onEventClick = { onCardClick(event) },
-        )
+        Box(modifier = Modifier.padding(horizontal = 8.dp)) {
+          EventPreviewCard(event = event, onClick = onCardClick)
+        }
       }
     }
   }

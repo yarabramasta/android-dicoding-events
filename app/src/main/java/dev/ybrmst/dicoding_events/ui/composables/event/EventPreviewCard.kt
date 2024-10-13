@@ -8,15 +8,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -31,9 +33,9 @@ import dev.ybrmst.dicoding_events.ui.theme.AppTheme
 fun EventPreviewCard(
   modifier: Modifier = Modifier,
   event: EventPreview,
-  onEventClick: () -> Unit = { },
+  onClick: (EventPreview) -> Unit,
 ) {
-  val (showShimmer, setShowShimmer) = remember { mutableStateOf(true) }
+  var showShimmer by remember { mutableStateOf(true) }
 
   ListItem(
     leadingContent = {
@@ -41,28 +43,37 @@ fun EventPreviewCard(
         model = event.imageLogo,
         contentDescription = event.name,
         onState = {
-          when (it) {
-            AsyncImagePainter.State.Empty -> setShowShimmer(true)
-            is AsyncImagePainter.State.Error -> setShowShimmer(false)
-            is AsyncImagePainter.State.Loading -> setShowShimmer(true)
-            is AsyncImagePainter.State.Success -> setShowShimmer(false)
+          showShimmer = when (it) {
+            AsyncImagePainter.State.Empty -> true
+            is AsyncImagePainter.State.Error -> false
+            is AsyncImagePainter.State.Loading -> true
+            is AsyncImagePainter.State.Success -> false
           }
         },
         modifier = Modifier
           .size(64.dp)
           .aspectRatio(1f)
-          .clip(RoundedCornerShape(6))
+          .clip(MaterialTheme.shapes.small)
           .background(shimmerBrush(show = showShimmer, targetValue = 1300f))
       )
     },
-    overlineContent = { Text(event.cityName) },
+    overlineContent = {
+      Text(
+        event.cityName,
+        style = MaterialTheme.typography.labelMedium,
+        fontWeight = FontWeight.SemiBold,
+        color = MaterialTheme.colorScheme.secondary,
+        modifier = Modifier.padding(bottom = 4.dp)
+      )
+    },
     headlineContent = {
       Text(
         event.name,
+        fontWeight = FontWeight.SemiBold,
         color = MaterialTheme.colorScheme.primary,
         maxLines = 2,
         overflow = TextOverflow.Ellipsis,
-        modifier = Modifier.padding(vertical = 8.dp)
+        modifier = Modifier.padding(bottom = 8.dp)
       )
     },
     supportingContent = {
@@ -73,7 +84,7 @@ fun EventPreviewCard(
         overflow = TextOverflow.Ellipsis,
       )
     },
-    modifier = modifier.clickable { onEventClick() }
+    modifier = modifier.clickable { onClick(event) }
   )
 }
 
@@ -128,7 +139,7 @@ private fun DefaultPreview() {
   )
 
   AppTheme {
-    EventPreviewCard(event = event)
+    EventPreviewCard(event = event, onClick = { })
   }
 }
 

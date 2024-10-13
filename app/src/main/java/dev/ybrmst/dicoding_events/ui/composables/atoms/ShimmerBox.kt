@@ -73,7 +73,7 @@ fun ShimmerBox(
   if (!animate) {
     Box(
       modifier = modifier
-        .clip(RoundedCornerShape(6.dp))
+        .clip(MaterialTheme.shapes.small)
         .background(MaterialTheme.colorScheme.surfaceContainer)
     )
   } else {

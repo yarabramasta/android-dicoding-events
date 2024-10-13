@@ -1,7 +1,9 @@
 package dev.ybrmst.dicoding_events.ui.viewmodel.home
 
+import androidx.compose.runtime.Immutable
 import dev.ybrmst.dicoding_events.domain.EventPreview
 
+@Immutable
 data class HomeState(
   val upcomingEvents: List<EventPreview>,
   val pastEvents: List<EventPreview>,

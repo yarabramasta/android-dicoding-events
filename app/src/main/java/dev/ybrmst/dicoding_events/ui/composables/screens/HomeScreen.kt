@@ -9,13 +9,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.ybrmst.dicoding_events.domain.EventPreview
 import dev.ybrmst.dicoding_events.ui.composables.event.errorEventsItem
 import dev.ybrmst.dicoding_events.ui.composables.event.pastEventsItem
@@ -30,23 +29,15 @@ fun HomeScreen(
   modifier: Modifier = Modifier,
   vm: HomeViewModel = koinViewModel(),
 ) {
-  val state by vm.state.collectAsState()
-
-  LaunchedEffect(Unit) {
-    vm.add(HomeEvent.OnFetchEvents)
-  }
+  val state by vm.state.collectAsStateWithLifecycle()
 
   HomeScreenContent(
     upcomingEvents = state.upcomingEvents,
     pastEvents = state.pastEvents,
     isLoading = state.isFetching,
     isError = state.isError,
-    onCardClick = { event ->
-      println("[${event.id}] Event card clicked: $event")
-    },
-    onRetryClick = {
-      vm.add(HomeEvent.OnFetchEvents)
-    },
+    onCardClick = { event -> println("[${event.id}] Event card clicked: $event") },
+    onRetryClick = { vm.add(HomeEvent.OnFetchEvents) },
     modifier = modifier
   )
 }
@@ -64,21 +55,22 @@ private fun HomeScreenContent(
   LazyColumn(
     contentPadding = PaddingValues(vertical = 24.dp),
     verticalArrangement = Arrangement.spacedBy(24.dp),
-    modifier = modifier
-      .fillMaxSize()
-      .padding(horizontal = 24.dp),
+    modifier = modifier.fillMaxSize(),
   ) {
     item {
       Text(
         "Dicoding Events",
         style = MaterialTheme.typography.titleLarge,
         fontWeight = FontWeight.SemiBold,
-        modifier = Modifier.padding(bottom = 8.dp)
+        modifier = Modifier
+          .padding(bottom = 8.dp)
+          .padding(horizontal = 24.dp)
       )
       Text(
         "Recommendation events for you!",
-        style = MaterialTheme.typography.bodyMedium,
+        style = MaterialTheme.typography.bodyLarge,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(horizontal = 24.dp)
       )
     }
 

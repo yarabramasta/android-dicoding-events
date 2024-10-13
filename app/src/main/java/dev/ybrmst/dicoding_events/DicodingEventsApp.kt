@@ -21,11 +21,13 @@ class DicodingEventsApp : Application(), SingletonImageLoader.Factory {
         eventsModule
       )
     }
+
+
   }
 
   override fun newImageLoader(context: PlatformContext): ImageLoader {
     return ImageLoader.Builder(context)
-      .memoryCachePolicy(CachePolicy.ENABLED)
+      .diskCachePolicy(CachePolicy.ENABLED)
       .build()
   }
 }
