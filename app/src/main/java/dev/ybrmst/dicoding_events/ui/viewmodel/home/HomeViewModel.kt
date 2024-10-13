@@ -28,21 +28,19 @@ class HomeViewModel(private val repo: EventsRepository) : ViewModel() {
   }
 
   private fun onRefresh() {
-    _state.value = HomeState.Refreshing
-    onFetchEvents()
+    onFetchEvents(forceRefetch = true)
   }
 
-  private fun onFetchEvents() {
+  private fun onFetchEvents(forceRefetch: Boolean = false) {
 
     viewModelScope.launch {
-      _state.value = HomeState.Fetching
+      _state.value =
+        if (forceRefetch) HomeState.Refreshing else HomeState.Fetching
 
       val result = coroutineScope {
-
         val upcomingEvents = async {
           repo.getEvents(active = 1, limit = 5)
         }.await()
-
         val pastEvents = async {
           repo.getEvents(active = 0, limit = 5)
         }.await()
@@ -51,7 +49,6 @@ class HomeViewModel(private val repo: EventsRepository) : ViewModel() {
       }
 
       result.let { (res1, res2) ->
-
         val didErrorResults = res1 is Resource.Error || res2 is Resource.Error
 
         _state.value = if (didErrorResults) {

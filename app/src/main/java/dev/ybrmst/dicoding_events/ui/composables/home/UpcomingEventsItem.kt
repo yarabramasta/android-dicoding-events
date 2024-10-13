@@ -46,12 +46,12 @@ fun LazyListScope.upcomingEventsItem(
     ) {
       if (isLoading) {
         items(5) {
-          ShimmerBox(modifier = Modifier.size(200.dp))
+          ShimmerBox(modifier = Modifier.size(240.dp))
         }
       } else {
         if (events.isEmpty()) {
           items(2) {
-            ShimmerBox(animate = false, modifier = Modifier.size(200.dp))
+            ShimmerBox(animate = false, modifier = Modifier.size(240.dp))
           }
         } else {
           items(events) {

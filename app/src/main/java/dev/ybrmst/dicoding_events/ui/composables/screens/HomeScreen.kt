@@ -39,8 +39,8 @@ fun HomeScreen(
   PullToRefreshBox(
     isRefreshing = state.isRefreshing,
     onRefresh = { vm.add(HomeEvent.OnRefresh) },
+    modifier = modifier.fillMaxSize(),
   ) {
-
     HomeScreenContent(
       upcomingEvents = state.upcomingEvents,
       pastEvents = state.pastEvents,
@@ -48,7 +48,6 @@ fun HomeScreen(
       isError = state.isError,
       onCardClick = { event -> println("[${event.id}] Event clicked: $event") },
       onRetryClick = { vm.add(HomeEvent.OnFetch) },
-      modifier = modifier
     )
   }
 }

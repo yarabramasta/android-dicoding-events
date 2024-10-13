@@ -63,6 +63,7 @@ fun LazyListScope.pastEventsItem(
     } else {
       itemsIndexed(events) { index, event ->
         if (index == 0) {
+          Spacer(modifier = Modifier.height(16.dp))
           Text(
             "Finished Events",
             style = MaterialTheme.typography.titleMedium,
