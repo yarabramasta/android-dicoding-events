@@ -35,20 +35,24 @@ class HomeViewModel(private val repo: EventsRepository) : ViewModel() {
 
       val result = coroutineScope {
 
-        val events = async { repo.getEvents(active = -1) }.await()
-        val highlights = async {
+        val upcomingEvents = async {
           repo.getEvents(active = 1, limit = 5)
         }.await()
 
-        Pair(highlights, events)
+        val pastEvents = async {
+          repo.getEvents(active = 0, limit = 5)
+        }.await()
+
+        Pair(upcomingEvents, pastEvents)
       }
 
       result.let { (res1, res2) ->
 
         val didErrorResults = res1 is Resource.Error || res2 is Resource.Error
 
-        _state.value = if (didErrorResults) HomeState.Error
-        else {
+        _state.value = if (didErrorResults) {
+          HomeState.Error
+        } else {
           HomeState.loaded(
             highlights = res1.data ?: emptyList(),
             events = res2.data ?: emptyList()

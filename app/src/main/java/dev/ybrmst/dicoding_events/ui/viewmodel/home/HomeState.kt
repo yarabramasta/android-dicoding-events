@@ -3,16 +3,16 @@ package dev.ybrmst.dicoding_events.ui.viewmodel.home
 import dev.ybrmst.dicoding_events.domain.EventPreview
 
 data class HomeState(
-  val highlights: List<EventPreview>,
-  val events: List<EventPreview>,
+  val upcomingEvents: List<EventPreview>,
+  val pastEvents: List<EventPreview>,
   val isFetching: Boolean = true,
   val isError: Boolean = false,
 ) {
 
   companion object {
     private val Empty = HomeState(
-      highlights = emptyList(),
-      events = emptyList(),
+      upcomingEvents = emptyList(),
+      pastEvents = emptyList(),
       isFetching = true,
       isError = false
     )
@@ -28,8 +28,8 @@ data class HomeState(
       events: List<EventPreview>,
     ) =
       HomeState(
-        highlights = highlights,
-        events = events,
+        upcomingEvents = highlights,
+        pastEvents = events,
         isFetching = false,
         isError = false,
       )
