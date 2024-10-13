@@ -52,6 +52,7 @@ import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import coil3.compose.AsyncImagePainter
 import dev.ybrmst.dicoding_events.domain.EventDetail
+import dev.ybrmst.dicoding_events.ui.composables.atoms.HtmlRenderer
 import dev.ybrmst.dicoding_events.ui.composables.atoms.ShimmerBox
 import dev.ybrmst.dicoding_events.ui.composables.atoms.shimmerBrush
 import dev.ybrmst.dicoding_events.ui.theme.AppTheme
@@ -142,6 +143,15 @@ private fun EventDetailScreenContent(
               )
             }
           }
+        } else {
+          item {
+            ShimmerBox(
+              animate = false,
+              modifier = Modifier
+                .fillMaxWidth()
+                .height(280.dp)
+            )
+          }
         }
         when {
           isLoading -> buildLoadingFallback()
@@ -152,6 +162,8 @@ private fun EventDetailScreenContent(
                 text = "Failed to load event detail. Please try again.",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.error,
+                modifier = Modifier
+                  .padding(horizontal = 24.dp)
               )
             }
           }
@@ -197,7 +209,7 @@ private fun ContentBottomBar(
     modifier = Modifier
       .fillMaxWidth()
       .background(MaterialTheme.colorScheme.surface)
-      .padding(16.dp)
+      .padding(24.dp)
   ) {
     if (!isLoading) {
       if (isError) {
@@ -323,10 +335,8 @@ private fun LazyListScope.buildContent(event: EventDetail) {
     }
   }
   item {
-    Text(
-      event.description,
-      style = MaterialTheme.typography.bodyLarge,
-      color = MaterialTheme.colorScheme.onSurfaceVariant,
+    HtmlRenderer(
+      html = event.description,
       modifier = Modifier.padding(horizontal = 24.dp)
     )
   }
@@ -336,38 +346,38 @@ private fun LazyListScope.buildLoadingFallback() {
   item {
     ShimmerBox(
       modifier = Modifier
+        .padding(horizontal = 24.dp)
         .width(64.dp)
         .height(16.dp)
-        .padding(horizontal = 24.dp)
     )
     ShimmerBox(
       modifier = Modifier
         .padding(vertical = 8.dp)
+        .padding(horizontal = 24.dp)
         .fillMaxWidth()
         .height(32.dp)
-        .padding(horizontal = 24.dp)
     )
     ShimmerBox(
       modifier = Modifier
+        .padding(horizontal = 24.dp)
         .fillMaxWidth()
         .height(56.dp)
-        .padding(horizontal = 24.dp)
     )
   }
   item {
     ShimmerBox(
       modifier = Modifier
+        .padding(horizontal = 24.dp)
         .width(240.dp)
         .height(64.dp)
-        .padding(horizontal = 24.dp)
     )
   }
   item {
     ShimmerBox(
       modifier = Modifier
+        .padding(horizontal = 24.dp)
         .fillMaxWidth()
         .height(300.dp)
-        .padding(horizontal = 24.dp)
     )
   }
 }
