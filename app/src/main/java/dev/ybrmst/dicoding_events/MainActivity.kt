@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import dev.ybrmst.dicoding_events.ui.composables.screens.HomeScreen
+import dev.ybrmst.dicoding_events.ui.composables.screens.MainScreen
 import dev.ybrmst.dicoding_events.ui.theme.AppTheme
 
 class MainActivity : ComponentActivity() {
@@ -13,7 +13,7 @@ class MainActivity : ComponentActivity() {
     enableEdgeToEdge()
     setContent {
       AppTheme {
-        HomeScreen()
+        MainScreen()
       }
     }
   }

@@ -1,6 +1,5 @@
 package dev.ybrmst.dicoding_events.ui.composables.screens
 
-
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
