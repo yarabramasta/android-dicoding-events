@@ -2,12 +2,16 @@ package dev.ybrmst.dicoding_events.ui.composables.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -17,13 +21,14 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.ybrmst.dicoding_events.domain.EventPreview
 import dev.ybrmst.dicoding_events.ui.composables.event.errorEventsItem
-import dev.ybrmst.dicoding_events.ui.composables.event.pastEventsItem
-import dev.ybrmst.dicoding_events.ui.composables.event.upcomingEventsItem
+import dev.ybrmst.dicoding_events.ui.composables.home.pastEventsItem
+import dev.ybrmst.dicoding_events.ui.composables.home.upcomingEventsItem
 import dev.ybrmst.dicoding_events.ui.theme.AppTheme
 import dev.ybrmst.dicoding_events.ui.viewmodel.home.HomeEvent
 import dev.ybrmst.dicoding_events.ui.viewmodel.home.HomeViewModel
 import org.koin.androidx.compose.koinViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
   modifier: Modifier = Modifier,
@@ -31,15 +36,21 @@ fun HomeScreen(
 ) {
   val state by vm.state.collectAsStateWithLifecycle()
 
-  HomeScreenContent(
-    upcomingEvents = state.upcomingEvents,
-    pastEvents = state.pastEvents,
-    isLoading = state.isFetching,
-    isError = state.isError,
-    onCardClick = { event -> println("[${event.id}] Event card clicked: $event") },
-    onRetryClick = { vm.add(HomeEvent.OnFetchEvents) },
-    modifier = modifier
-  )
+  PullToRefreshBox(
+    isRefreshing = state.isRefreshing,
+    onRefresh = { vm.add(HomeEvent.OnRefresh) },
+  ) {
+
+    HomeScreenContent(
+      upcomingEvents = state.upcomingEvents,
+      pastEvents = state.pastEvents,
+      isLoading = state.isFetching || state.isRefreshing,
+      isError = state.isError,
+      onCardClick = { event -> println("[${event.id}] Event clicked: $event") },
+      onRetryClick = { vm.add(HomeEvent.OnFetch) },
+      modifier = modifier
+    )
+  }
 }
 
 @Composable
@@ -52,12 +63,14 @@ private fun HomeScreenContent(
   onCardClick: (EventPreview) -> Unit = {},
   onRetryClick: () -> Unit = {},
 ) {
+
   LazyColumn(
-    contentPadding = PaddingValues(vertical = 24.dp),
-    verticalArrangement = Arrangement.spacedBy(24.dp),
+    contentPadding = PaddingValues(vertical = 8.dp),
+    verticalArrangement = Arrangement.spacedBy(8.dp),
     modifier = modifier.fillMaxSize(),
   ) {
     item {
+      Spacer(modifier = Modifier.height(16.dp))
       Text(
         "Dicoding Events",
         style = MaterialTheme.typography.titleLarge,
@@ -72,6 +85,7 @@ private fun HomeScreenContent(
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = Modifier.padding(horizontal = 24.dp)
       )
+      Spacer(modifier = Modifier.height(16.dp))
     }
 
     if (!isError) {
@@ -81,9 +95,7 @@ private fun HomeScreenContent(
         onCardClick = onCardClick
       )
       pastEventsItem(
-        isLoading = isLoading,
-        events = pastEvents,
-        onCardClick = onCardClick
+        isLoading = isLoading, events = pastEvents, onCardClick = onCardClick
       )
     } else {
       errorEventsItem { onRetryClick() }

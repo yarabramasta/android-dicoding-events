@@ -1,6 +1,8 @@
-package dev.ybrmst.dicoding_events.ui.composables.event
+package dev.ybrmst.dicoding_events.ui.composables.home
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -9,6 +11,8 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.ybrmst.dicoding_events.domain.EventPreview
+import dev.ybrmst.dicoding_events.ui.composables.event.EventPreviewCard
+import dev.ybrmst.dicoding_events.ui.composables.event.EventPreviewCardFallback
 
 fun LazyListScope.pastEventsItem(
   isLoading: Boolean,
@@ -18,6 +22,7 @@ fun LazyListScope.pastEventsItem(
   if (isLoading) {
     items(5) { index ->
       if (index == 0) {
+        Spacer(modifier = Modifier.height(16.dp))
         Text(
           "Finished Events",
           style = MaterialTheme.typography.titleMedium,
@@ -32,22 +37,25 @@ fun LazyListScope.pastEventsItem(
     }
   } else {
     if (events.isEmpty()) {
-      item {
-        Text(
-          "Finished Events",
-          style = MaterialTheme.typography.titleMedium,
-          modifier = Modifier
-            .padding(bottom = 8.dp)
-            .padding(horizontal = 24.dp)
-        )
-        Text(
-          "There are no finished events.",
-          style = MaterialTheme.typography.bodySmall,
-          color = MaterialTheme.colorScheme.outline,
-          modifier = Modifier
-            .padding(bottom = 16.dp)
-            .padding(horizontal = 24.dp)
-        )
+      items(2) { index ->
+        if (index == 0) {
+          Spacer(modifier = Modifier.height(16.dp))
+          Text(
+            "Finished Events",
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier
+              .padding(bottom = 8.dp)
+              .padding(horizontal = 24.dp)
+          )
+          Text(
+            "There are no finished events.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.outline,
+            modifier = Modifier
+              .padding(bottom = 16.dp)
+              .padding(horizontal = 24.dp)
+          )
+        }
         Box(modifier = Modifier.padding(horizontal = 8.dp)) {
           EventPreviewCardFallback(animate = false)
         }

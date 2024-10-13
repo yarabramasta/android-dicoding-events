@@ -1,4 +1,4 @@
-package dev.ybrmst.dicoding_events.ui.composables.event
+package dev.ybrmst.dicoding_events.ui.composables.home
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.ybrmst.dicoding_events.domain.EventPreview
 import dev.ybrmst.dicoding_events.ui.composables.atoms.ShimmerBox
+import dev.ybrmst.dicoding_events.ui.composables.event.FeaturedEventCard
 
 fun LazyListScope.upcomingEventsItem(
   isLoading: Boolean,
@@ -49,7 +50,7 @@ fun LazyListScope.upcomingEventsItem(
         }
       } else {
         if (events.isEmpty()) {
-          items(5) {
+          items(2) {
             ShimmerBox(animate = false, modifier = Modifier.size(200.dp))
           }
         } else {

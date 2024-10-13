@@ -90,9 +90,7 @@ fun ShimmerBox(
 private fun ShimmerBoxPreview() {
   AppTheme {
     ShimmerBox(
-      modifier = Modifier
-        .size(64.dp)
-        .padding(8.dp),
+      modifier = Modifier.size(64.dp).padding(8.dp),
       animate = true,
       show = true
     )

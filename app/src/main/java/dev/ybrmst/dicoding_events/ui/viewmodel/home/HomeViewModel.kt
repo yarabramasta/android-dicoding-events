@@ -23,12 +23,12 @@ class HomeViewModel(private val repo: EventsRepository) : ViewModel() {
   fun add(event: HomeEvent) {
     when (event) {
       HomeEvent.OnRefresh -> onRefresh()
-      HomeEvent.OnFetchEvents -> onFetchEvents()
+      HomeEvent.OnFetch -> onFetchEvents()
     }
   }
 
   private fun onRefresh() {
-    _state.value = HomeState.Fetching
+    _state.value = HomeState.Refreshing
     onFetchEvents()
   }
 

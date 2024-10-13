@@ -8,6 +8,7 @@ data class HomeState(
   val upcomingEvents: List<EventPreview>,
   val pastEvents: List<EventPreview>,
   val isFetching: Boolean = true,
+  val isRefreshing: Boolean = false,
   val isError: Boolean = false,
 ) {
 
@@ -16,12 +17,15 @@ data class HomeState(
       upcomingEvents = emptyList(),
       pastEvents = emptyList(),
       isFetching = true,
+      isRefreshing = false,
       isError = false
     )
 
     val Initial = Empty
 
     val Fetching = Empty.copy(isFetching = true)
+
+    val Refreshing = Empty.copy(isRefreshing = true)
 
     val Error = Empty.copy(isError = true)
 
@@ -33,6 +37,7 @@ data class HomeState(
         upcomingEvents = highlights,
         pastEvents = events,
         isFetching = false,
+        isRefreshing = false,
         isError = false,
       )
   }

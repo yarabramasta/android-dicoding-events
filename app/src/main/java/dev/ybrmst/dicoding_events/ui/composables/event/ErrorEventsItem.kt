@@ -1,5 +1,6 @@
 package dev.ybrmst.dicoding_events.ui.composables.event
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -24,25 +25,34 @@ fun LazyListScope.errorEventsItem(
       message,
       style = MaterialTheme.typography.bodySmall,
       color = MaterialTheme.colorScheme.outline,
-      modifier = Modifier.padding(bottom = 16.dp)
+      modifier = Modifier
+        .padding(bottom = 16.dp)
+        .fillMaxWidth()
+        .padding(horizontal = 24.dp)
     )
-    Button(
-      colors = ButtonDefaults.filledTonalButtonColors().copy(
-        containerColor = MaterialTheme.colorScheme.errorContainer,
-        contentColor = MaterialTheme.colorScheme.onErrorContainer
-      ),
-      onClick = { onRetryClick() },
-      modifier = Modifier.fillMaxWidth(),
+    Box(
+      modifier = Modifier
+        .fillMaxWidth()
+        .padding(horizontal = 24.dp)
     ) {
-      Row(
-        verticalAlignment = Alignment.CenterVertically
+      Button(
+        colors = ButtonDefaults.filledTonalButtonColors().copy(
+          containerColor = MaterialTheme.colorScheme.errorContainer,
+          contentColor = MaterialTheme.colorScheme.onErrorContainer
+        ),
+        onClick = { onRetryClick() },
+        modifier = Modifier.fillMaxWidth(),
       ) {
-        Icon(
-          imageVector = Icons.Filled.Refresh,
-          contentDescription = null,
-          modifier = Modifier.padding(end = 8.dp),
-        )
-        Text("Retry")
+        Row(
+          verticalAlignment = Alignment.CenterVertically
+        ) {
+          Icon(
+            imageVector = Icons.Filled.Refresh,
+            contentDescription = null,
+            modifier = Modifier.padding(end = 8.dp),
+          )
+          Text("Retry")
+        }
       }
     }
   }
