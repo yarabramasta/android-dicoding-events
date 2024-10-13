@@ -18,7 +18,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.PeopleAlt
@@ -74,12 +74,10 @@ fun EventDetailScreen(
 
 private fun formatDate(dateStr: String): String {
   val inputFormatter = SimpleDateFormat(
-    "yyyy-MM-dd HH:mm:ss",
-    Locale.getDefault()
+    "yyyy-MM-dd HH:mm:ss", Locale.getDefault()
   )
   val outputFormatter = SimpleDateFormat(
-    "EEE, d MMM yyyy HH:mm a",
-    Locale.getDefault()
+    "EEE, d MMM yyyy HH:mm a", Locale.getDefault()
   )
 
   return outputFormatter.format(inputFormatter.parse(dateStr)!!)
@@ -96,17 +94,8 @@ private fun EventDetailScreenContent(
   val context = LocalContext.current
 
   Scaffold(
-    topBar = {
-      EventDetailScreenTopBar(
-        eventMediaCover = event.mediaCover,
-        eventName = event.name,
-        isLoading = isLoading,
-        isError = isError,
-        onPop = onPop
-      )
-    },
     bottomBar = {
-      BottomBar(
+      ContentBottomBar(
         context = context,
         isLoading = isLoading,
         isError = isError,
@@ -115,33 +104,89 @@ private fun EventDetailScreenContent(
       )
     }
   ) { innerPadding ->
-    LazyColumn(
-      modifier = Modifier
-        .fillMaxSize()
-        .padding(innerPadding),
-      contentPadding = PaddingValues(24.dp),
-      verticalArrangement = Arrangement.spacedBy(16.dp),
-    ) {
-      when {
-        isError -> {
+    var showShimmer by remember { mutableStateOf(true) }
+
+    Box {
+      ContentTopBar(onPop = onPop)
+      LazyColumn(
+        modifier = Modifier
+          .fillMaxSize()
+          .padding(innerPadding),
+        contentPadding = PaddingValues(0.dp),
+        verticalArrangement = Arrangement.spacedBy(24.dp),
+      ) {
+        if (!(isLoading || isError)) {
           item {
-            Text(
-              text = "Failed to load event detail. Please try again.",
-              style = MaterialTheme.typography.titleMedium,
-              color = MaterialTheme.colorScheme.error,
-            )
+            Box(modifier = Modifier.height(280.dp)) {
+              AsyncImage(
+                model = event.mediaCover,
+                contentDescription = event.name,
+                alignment = Alignment.TopCenter,
+                contentScale = ContentScale.FillBounds,
+                onState = {
+                  showShimmer = when (it) {
+                    AsyncImagePainter.State.Empty -> true
+                    is AsyncImagePainter.State.Error -> false
+                    is AsyncImagePainter.State.Loading -> true
+                    is AsyncImagePainter.State.Success -> false
+                  }
+                },
+                modifier = Modifier
+                  .fillMaxSize()
+                  .background(
+                    shimmerBrush(
+                      show = showShimmer,
+                      targetValue = 1300f
+                    )
+                  )
+              )
+            }
           }
         }
+        when {
+          isLoading -> buildLoadingFallback()
 
-        isLoading -> buildLoadingFallback()
-        else -> buildContent(event)
+          isError -> {
+            item {
+              Text(
+                text = "Failed to load event detail. Please try again.",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.error,
+              )
+            }
+          }
+
+          else -> buildContent(event)
+        }
       }
     }
   }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun BottomBar(
+private fun ContentTopBar(onPop: () -> Unit) {
+  TopAppBar(title = {}, navigationIcon = {
+    IconButton(onClick = onPop) {
+      Icon(
+        imageVector = Icons.Filled.ArrowBackIosNew,
+        contentDescription = "Back",
+        tint = Color.Black
+      )
+    }
+  },
+    colors = TopAppBarDefaults.largeTopAppBarColors().copy(
+      containerColor = Color.Transparent,
+      scrolledContainerColor = Color.Transparent
+    ),
+    modifier = Modifier
+      .fillMaxWidth()
+      .zIndex(1f)
+  )
+}
+
+@Composable
+private fun ContentBottomBar(
   context: Context = LocalContext.current,
   isLoading: Boolean = false,
   isError: Boolean = false,
@@ -178,8 +223,7 @@ private fun BottomBar(
           onClick = {
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
             context.startActivity(intent)
-          },
-          modifier = Modifier.fillMaxWidth()
+          }, modifier = Modifier.fillMaxWidth()
         ) { Text("Register") }
       }
     }
@@ -192,31 +236,37 @@ private fun LazyListScope.buildContent(event: EventDetail) {
       event.cityName,
       style = MaterialTheme.typography.labelMedium,
       color = MaterialTheme.colorScheme.secondary,
+      modifier = Modifier.padding(horizontal = 24.dp)
     )
     Spacer(modifier = Modifier.height(4.dp))
     Text(
       event.name,
       style = MaterialTheme.typography.titleLarge,
       color = MaterialTheme.colorScheme.primary,
-      fontWeight = FontWeight.Bold
+      fontWeight = FontWeight.Bold,
+      modifier = Modifier.padding(horizontal = 24.dp)
     )
     Spacer(modifier = Modifier.height(8.dp))
     Text(
       "By ${event.ownerName}",
-      style = MaterialTheme.typography.bodySmall,
+      style = MaterialTheme.typography.bodyMedium,
       color = MaterialTheme.colorScheme.outline,
+      modifier = Modifier.padding(horizontal = 24.dp)
     )
     Spacer(modifier = Modifier.height(16.dp))
     Text(
       event.summary,
-      style = MaterialTheme.typography.bodySmall,
+      style = MaterialTheme.typography.bodyMedium,
       color = MaterialTheme.colorScheme.outline,
+      modifier = Modifier.padding(horizontal = 24.dp)
     )
   }
   item {
     Row(
-      modifier = Modifier.fillMaxWidth(),
-      verticalAlignment = Alignment.CenterVertically
+      verticalAlignment = Alignment.CenterVertically,
+      modifier = Modifier
+        .fillMaxWidth()
+        .padding(horizontal = 24.dp),
     ) {
       Icon(
         imageVector = Icons.Filled.Category,
@@ -227,14 +277,16 @@ private fun LazyListScope.buildContent(event: EventDetail) {
       Spacer(modifier = Modifier.width(4.dp))
       Text(
         event.category,
-        style = MaterialTheme.typography.labelSmall,
+        style = MaterialTheme.typography.labelLarge,
         color = MaterialTheme.colorScheme.tertiary,
       )
     }
     Spacer(modifier = Modifier.height(8.dp))
     Row(
       verticalAlignment = Alignment.CenterVertically,
-      modifier = Modifier.fillMaxWidth()
+      modifier = Modifier
+        .fillMaxWidth()
+        .padding(horizontal = 24.dp)
     ) {
       Icon(
         imageVector = Icons.Filled.Event,
@@ -245,14 +297,16 @@ private fun LazyListScope.buildContent(event: EventDetail) {
       Spacer(modifier = Modifier.width(4.dp))
       Text(
         "${formatDate(event.beginTime)} - ${formatDate(event.endTime)}",
-        style = MaterialTheme.typography.labelSmall,
+        style = MaterialTheme.typography.labelLarge,
         color = MaterialTheme.colorScheme.tertiary,
       )
     }
     Spacer(modifier = Modifier.height(8.dp))
     Row(
       verticalAlignment = Alignment.CenterVertically,
-      modifier = Modifier.fillMaxWidth()
+      modifier = Modifier
+        .fillMaxWidth()
+        .padding(horizontal = 24.dp)
     ) {
       Icon(
         imageVector = Icons.Filled.PeopleAlt,
@@ -263,7 +317,7 @@ private fun LazyListScope.buildContent(event: EventDetail) {
       Spacer(modifier = Modifier.width(4.dp))
       Text(
         "Quota ${event.quota} | Registrants ${event.registrants}",
-        style = MaterialTheme.typography.labelSmall,
+        style = MaterialTheme.typography.labelLarge,
         color = MaterialTheme.colorScheme.tertiary,
       )
     }
@@ -271,8 +325,9 @@ private fun LazyListScope.buildContent(event: EventDetail) {
   item {
     Text(
       event.description,
-      style = MaterialTheme.typography.bodyMedium,
+      style = MaterialTheme.typography.bodyLarge,
       color = MaterialTheme.colorScheme.onSurfaceVariant,
+      modifier = Modifier.padding(horizontal = 24.dp)
     )
   }
 }
@@ -283,17 +338,20 @@ private fun LazyListScope.buildLoadingFallback() {
       modifier = Modifier
         .width(64.dp)
         .height(16.dp)
+        .padding(horizontal = 24.dp)
     )
     ShimmerBox(
       modifier = Modifier
         .padding(vertical = 8.dp)
         .fillMaxWidth()
         .height(32.dp)
+        .padding(horizontal = 24.dp)
     )
     ShimmerBox(
       modifier = Modifier
         .fillMaxWidth()
         .height(56.dp)
+        .padding(horizontal = 24.dp)
     )
   }
   item {
@@ -301,6 +359,7 @@ private fun LazyListScope.buildLoadingFallback() {
       modifier = Modifier
         .width(240.dp)
         .height(64.dp)
+        .padding(horizontal = 24.dp)
     )
   }
   item {
@@ -308,61 +367,7 @@ private fun LazyListScope.buildLoadingFallback() {
       modifier = Modifier
         .fillMaxWidth()
         .height(300.dp)
-    )
-  }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun EventDetailScreenTopBar(
-  eventMediaCover: String,
-  eventName: String,
-  isLoading: Boolean = false,
-  isError: Boolean = false,
-  onPop: () -> Unit,
-) {
-  var showShimmer by remember { mutableStateOf(true) }
-
-  Box(modifier = Modifier.height(240.dp)) {
-    if (isLoading || isError) {
-      ShimmerBox(modifier = Modifier.fillMaxSize())
-    } else {
-      AsyncImage(
-        model = eventMediaCover,
-        contentDescription = eventName,
-        alignment = Alignment.TopCenter,
-        contentScale = ContentScale.FillBounds,
-        onState = {
-          showShimmer = when (it) {
-            AsyncImagePainter.State.Empty -> true
-            is AsyncImagePainter.State.Error -> false
-            is AsyncImagePainter.State.Loading -> true
-            is AsyncImagePainter.State.Success -> false
-          }
-        },
-        modifier = Modifier
-          .fillMaxSize()
-          .background(shimmerBrush(show = showShimmer, targetValue = 1300f))
-      )
-    }
-    TopAppBar(
-      title = {},
-      navigationIcon = {
-        IconButton(onClick = onPop) {
-          Icon(
-            imageVector =
-            Icons.AutoMirrored.Filled.ArrowBack,
-            contentDescription = "Back"
-          )
-        }
-      },
-      colors = TopAppBarDefaults.largeTopAppBarColors().copy(
-        containerColor = Color.Transparent,
-        scrolledContainerColor = Color.Transparent
-      ),
-      modifier = Modifier
-        .fillMaxWidth()
-        .zIndex(1f)
+        .padding(horizontal = 24.dp)
     )
   }
 }
@@ -389,10 +394,7 @@ private val eventDetail = EventDetail(
 private fun DefaultStatePreview() {
 
   AppTheme {
-    EventDetailScreenContent(
-      event = eventDetail,
-      onPop = {}
-    )
+    EventDetailScreenContent(event = eventDetail, onPop = {})
   }
 }
 
