@@ -22,20 +22,20 @@ class HomeViewModel(private val repo: EventsRepository) : ViewModel() {
 
   fun add(event: HomeEvent) {
     when (event) {
-      HomeEvent.OnRefresh -> onRefresh()
-      HomeEvent.OnFetch -> onFetchEvents()
+      HomeEvent.OnFetch -> {
+        _state.value = HomeState.Fetching
+        onFetchEvents()
+      }
+      HomeEvent.OnRefresh -> {
+        _state.value = HomeState.Refreshing
+        onFetchEvents()
+      }
     }
   }
 
-  private fun onRefresh() {
-    onFetchEvents(forceRefetch = true)
-  }
-
-  private fun onFetchEvents(forceRefetch: Boolean = false) {
+  private fun onFetchEvents() {
 
     viewModelScope.launch {
-      _state.value =
-        if (forceRefetch) HomeState.Refreshing else HomeState.Fetching
 
       val result = coroutineScope {
         val upcomingEvents = async {

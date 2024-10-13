@@ -84,7 +84,9 @@ fun EventPreviewCard(
         overflow = TextOverflow.Ellipsis,
       )
     },
-    modifier = modifier.clickable { onClick(event) }
+    modifier = modifier
+      .clip(MaterialTheme.shapes.small)
+      .clickable { onClick(event) }
   )
 }
 
@@ -94,18 +96,11 @@ fun EventPreviewCardFallback(
 ) {
 
   ListItem(
-    leadingContent = {
-      ShimmerBox(
-        modifier = Modifier
-          .size(64.dp)
-      )
-    },
+    leadingContent = { ShimmerBox(modifier = Modifier.size(64.dp)) },
     overlineContent = {
-      ShimmerBox(
-        modifier = Modifier
-          .width(64.dp)
-          .height(16.dp)
-      )
+      ShimmerBox(modifier = Modifier
+        .width(64.dp)
+        .height(16.dp))
     },
     headlineContent = {
       ShimmerBox(
@@ -124,6 +119,7 @@ fun EventPreviewCardFallback(
           .height(56.dp)
       )
     },
+    modifier = Modifier.clip(MaterialTheme.shapes.small)
   )
 }
 
