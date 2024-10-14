@@ -34,10 +34,13 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,6 +51,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import coil3.compose.AsyncImagePainter
@@ -56,21 +60,42 @@ import dev.ybrmst.dicoding_events.ui.composables.atoms.HtmlRenderer
 import dev.ybrmst.dicoding_events.ui.composables.atoms.ShimmerBox
 import dev.ybrmst.dicoding_events.ui.composables.atoms.shimmerBrush
 import dev.ybrmst.dicoding_events.ui.theme.AppTheme
+import dev.ybrmst.dicoding_events.ui.viewmodel.event.detail.DetailEvent
+import dev.ybrmst.dicoding_events.ui.viewmodel.event.detail.DetailViewModel
+import org.koin.androidx.compose.koinViewModel
 import java.text.SimpleDateFormat
 import java.util.Locale
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EventDetailScreen(
   eventId: Int,
   navController: NavHostController,
+  vm: DetailViewModel = koinViewModel(),
 ) {
-  EventDetailScreenContent(
-    event = eventDetail,
-    isLoading = false,
-    isError = false,
-    onPop = { navController.navigateUp() },
-    onRetry = { /* TODO: Retry fetching event detail */ },
-  )
+  val state by vm.state.collectAsStateWithLifecycle()
+  val initialFetch = rememberSaveable { mutableStateOf(false) }
+
+  LaunchedEffect(Unit) {
+    if (!initialFetch.value) {
+      vm.add(DetailEvent.OnFetch(eventId))
+      initialFetch.value = true
+    }
+  }
+
+  PullToRefreshBox(
+    isRefreshing = state.isRefreshing,
+    onRefresh = { vm.add(DetailEvent.OnRefresh(eventId)) },
+    modifier = Modifier.fillMaxSize()
+  ) {
+    EventDetailScreenContent(
+      event = state.event ?: EventDetail.Empty.copy(id = eventId),
+      isLoading = state.isFetching || state.isRefreshing,
+      isError = state.isError,
+      onPop = { navController.navigateUp() },
+      onRetry = { vm.add(DetailEvent.OnRefresh(eventId)) },
+    )
+  }
 }
 
 private fun formatDate(dateStr: String): String {
@@ -154,7 +179,7 @@ private fun EventDetailScreenContent(
           }
         }
         when {
-          isLoading -> buildLoadingFallback()
+          isLoading || event == null -> buildLoadingFallback()
 
           isError -> {
             item {

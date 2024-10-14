@@ -17,23 +17,23 @@ class HomeViewModel(private val repo: EventsRepository) : ViewModel() {
   val state: StateFlow<HomeState> get() = _state
 
   init {
-    onFetchEvents()
+    fetchEvents()
   }
 
   fun add(event: HomeEvent) {
     when (event) {
       HomeEvent.OnFetch -> {
         _state.value = HomeState.Fetching
-        onFetchEvents()
+        fetchEvents()
       }
       HomeEvent.OnRefresh -> {
         _state.value = HomeState.Refreshing
-        onFetchEvents()
+        fetchEvents()
       }
     }
   }
 
-  private fun onFetchEvents() {
+  private fun fetchEvents() {
 
     viewModelScope.launch {
 

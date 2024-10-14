@@ -7,7 +7,7 @@ import dev.ybrmst.dicoding_events.domain.EventPreview
 data class HomeState(
   val upcomingEvents: List<EventPreview>,
   val pastEvents: List<EventPreview>,
-  val isFetching: Boolean = true,
+  val isFetching: Boolean = false,
   val isRefreshing: Boolean = false,
   val isError: Boolean = false,
 ) {
@@ -16,12 +16,12 @@ data class HomeState(
     private val Empty = HomeState(
       upcomingEvents = emptyList(),
       pastEvents = emptyList(),
-      isFetching = true,
+      isFetching = false,
       isRefreshing = false,
       isError = false
     )
 
-    val Initial = Empty
+    val Initial = Empty.copy(isFetching = true)
 
     val Fetching = Empty.copy(isFetching = true)
 
