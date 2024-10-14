@@ -27,15 +27,15 @@ import dev.ybrmst.dicoding_events.ui.theme.AppTheme
 @Composable
 fun SearchEvents(
   modifier: Modifier = Modifier,
+  eventsType: String = "upcoming",
   events: List<EventPreview>,
-  onEventClick: (Int) -> Unit = {},
   isLoading: Boolean = false,
   isError: Boolean = false,
   searchQuery: String = "",
+  onEventClick: (Int) -> Unit = {},
   onSearch: (String) -> Unit = {},
-  onRetry: () -> Unit = {},
   onClearSearch: () -> Unit = {},
-  eventsType: String = "upcoming",
+  onRetry: () -> Unit = {},
 ) {
   if (eventsType != "upcoming" && eventsType != "finished") {
     throw IllegalArgumentException("Invalid events type: $eventsType")
@@ -47,13 +47,18 @@ fun SearchEvents(
     verticalArrangement = Arrangement.spacedBy(8.dp)
   ) {
     item {
-      Box(modifier = Modifier.padding(horizontal = 8.dp)) {
+      Box(
+        modifier = Modifier
+          .padding(bottom = 8.dp)
+          .padding(horizontal = 8.dp)
+      ) {
         OutlinedTextField(
           value = searchQuery,
           onValueChange = { onSearch(it) },
           modifier = Modifier
-            .padding(16.dp)
+            .padding(horizontal = 16.dp)
             .fillMaxWidth(),
+          shape = MaterialTheme.shapes.medium,
           placeholder = { Text(text = "Search...") },
           maxLines = 1,
           singleLine = true,
@@ -67,7 +72,7 @@ fun SearchEvents(
             Icon(
               imageVector = Icons.Filled.Close,
               contentDescription = null,
-              modifier = Modifier.clickable { onClearSearch() }
+              modifier = Modifier.clickable { if (searchQuery.isNotEmpty()) onClearSearch() }
             )
           }
         )
@@ -88,18 +93,13 @@ fun SearchEvents(
       events.isEmpty() -> {
         item {
           Text(
-            if (searchQuery.isNotEmpty()) "There are no results for $searchQuery in $eventsType events..." else "There are no $eventsType events found.",
+            if (searchQuery.isNotEmpty()) "There are no results for \"$searchQuery\" in $eventsType events..." else "There are no $eventsType events found.",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.outline,
             modifier = Modifier
               .padding(bottom = 16.dp)
               .padding(horizontal = 24.dp)
           )
-        }
-        items(3) {
-          Box(modifier = Modifier.padding(horizontal = 8.dp)) {
-            EventPreviewCardFallback(animate = false)
-          }
         }
       }
 
@@ -159,7 +159,6 @@ private fun LoadingStatePreview() {
     Scaffold {
       SearchEvents(
         events = emptyList(),
-        onEventClick = { },
         modifier = Modifier.padding(it),
         isLoading = true
       )

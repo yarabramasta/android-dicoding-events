@@ -37,8 +37,12 @@ class UpcomingEventsViewModel(
       }
 
       is UpcomingEventsUiEvent.OnQueryChanged -> {
-        _state.value = UpcomingEventsUiState.Fetching.copy(query = event.query)
+        _state.value = UpcomingEventsUiState.Initial.copy(query = event.query)
+
         searchJob?.cancel()
+
+        _state.value = UpcomingEventsUiState.Fetching.copy(query = event.query)
+
         searchJob = viewModelScope.launch {
           delay(500L)
           if (event.query.isEmpty()) {

@@ -100,7 +100,10 @@ fun EventPreviewCardFallback(
     overlineContent = {
       ShimmerBox(modifier = Modifier
         .width(64.dp)
-        .height(16.dp))
+        .height(16.dp)
+        ,
+        animate = animate
+      )
     },
     headlineContent = {
       ShimmerBox(

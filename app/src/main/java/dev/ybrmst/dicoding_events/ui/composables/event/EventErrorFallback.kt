@@ -51,9 +51,4 @@ fun LazyListScope.buildEventErrorFallback(
       }
     }
   }
-  items(3) {
-    Box(modifier = Modifier.padding(horizontal = 8.dp)) {
-      EventPreviewCardFallback(animate = false)
-    }
-  }
 }

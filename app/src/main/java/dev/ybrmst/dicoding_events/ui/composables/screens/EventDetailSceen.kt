@@ -48,6 +48,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -109,6 +110,27 @@ private fun formatDate(dateStr: String): String {
   return outputFormatter.format(inputFormatter.parse(dateStr)!!)
 }
 
+private fun mergeEventDates(
+  beginTime: String,
+  endTime: String,
+): String {
+  val beginDate = beginTime.substring(0, 10)
+  val endDate = endTime.substring(0, 10)
+
+  val formattedBeginTime = formatDate(beginTime)
+  val formattedEndTime = formatDate(endTime)
+
+  return if (beginDate == endDate) {
+    val extractedDate = formatDate(beginTime).substring(0, 16)
+    val extractedBeginTime = formatDate(beginTime).substring(17)
+    val extractedEndTime = formatDate(endTime).substring(17)
+
+    "$extractedDate at $extractedBeginTime - $extractedEndTime"
+  } else {
+    "$formattedBeginTime - $formattedEndTime"
+  }
+}
+
 @Composable
 private fun EventDetailScreenContent(
   event: EventDetail,
@@ -120,6 +142,12 @@ private fun EventDetailScreenContent(
   val context = LocalContext.current
 
   Scaffold(
+    topBar = {
+      ContentTopBar(
+        title = event.name,
+        onPop = onPop,
+      )
+    },
     bottomBar = {
       ContentBottomBar(
         context = context,
@@ -132,69 +160,66 @@ private fun EventDetailScreenContent(
   ) { innerPadding ->
     var showShimmer by remember { mutableStateOf(true) }
 
-    Box {
-      ContentTopBar(onPop = onPop)
-      LazyColumn(
-        modifier = Modifier
-          .fillMaxSize()
-          .padding(innerPadding),
-        contentPadding = PaddingValues(0.dp),
-        verticalArrangement = Arrangement.spacedBy(24.dp),
-      ) {
-        if (!(isLoading || isError)) {
-          item {
-            Box(modifier = Modifier.height(280.dp)) {
-              AsyncImage(
-                model = event.mediaCover,
-                contentDescription = event.name,
-                alignment = Alignment.TopCenter,
-                contentScale = ContentScale.FillBounds,
-                onState = {
-                  showShimmer = when (it) {
-                    AsyncImagePainter.State.Empty -> true
-                    is AsyncImagePainter.State.Error -> false
-                    is AsyncImagePainter.State.Loading -> true
-                    is AsyncImagePainter.State.Success -> false
-                  }
-                },
-                modifier = Modifier
-                  .fillMaxSize()
-                  .background(
-                    shimmerBrush(
-                      show = showShimmer,
-                      targetValue = 1300f
-                    )
-                  )
-              )
-            }
-          }
-        } else {
-          item {
-            ShimmerBox(
-              animate = false,
+    LazyColumn(
+      modifier = Modifier
+        .fillMaxSize()
+        .padding(innerPadding),
+      contentPadding = PaddingValues(0.dp),
+      verticalArrangement = Arrangement.spacedBy(24.dp),
+    ) {
+      if (!(isLoading || isError)) {
+        item {
+          Box(modifier = Modifier.height(280.dp)) {
+            AsyncImage(
+              model = event.mediaCover,
+              contentDescription = event.name,
+              alignment = Alignment.TopCenter,
+              contentScale = ContentScale.FillBounds,
+              onState = {
+                showShimmer = when (it) {
+                  AsyncImagePainter.State.Empty -> true
+                  is AsyncImagePainter.State.Error -> false
+                  is AsyncImagePainter.State.Loading -> true
+                  is AsyncImagePainter.State.Success -> false
+                }
+              },
               modifier = Modifier
-                .fillMaxWidth()
-                .height(280.dp)
+                .fillMaxSize()
+                .background(
+                  shimmerBrush(
+                    show = showShimmer,
+                    targetValue = 1300f
+                  )
+                )
             )
           }
         }
-        when {
-          isLoading -> buildLoadingFallback()
-
-          isError -> {
-            item {
-              Text(
-                text = "Failed to load event detail. Please try again.",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier
-                  .padding(horizontal = 24.dp)
-              )
-            }
-          }
-
-          else -> buildContent(event)
+      } else {
+        item {
+          ShimmerBox(
+            animate = false,
+            modifier = Modifier
+              .fillMaxWidth()
+              .height(280.dp)
+          )
         }
+      }
+      when {
+        isLoading -> buildLoadingFallback()
+
+        isError -> {
+          item {
+            Text(
+              text = "Failed to load event detail. Please try again.",
+              style = MaterialTheme.typography.titleMedium,
+              color = MaterialTheme.colorScheme.error,
+              modifier = Modifier
+                .padding(horizontal = 24.dp)
+            )
+          }
+        }
+
+        else -> buildContent(event)
       }
     }
   }
@@ -202,19 +227,31 @@ private fun EventDetailScreenContent(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ContentTopBar(onPop: () -> Unit) {
-  TopAppBar(title = {}, navigationIcon = {
-    IconButton(onClick = onPop) {
-      Icon(
-        imageVector = Icons.Filled.ArrowBackIosNew,
-        contentDescription = "Back",
-        tint = Color.Black
+private fun ContentTopBar(title: String, onPop: () -> Unit) {
+  TopAppBar(
+    title = {
+      Text(
+        title,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        fontWeight = FontWeight.SemiBold,
+        modifier = Modifier
+          .padding(end = 24.dp)
+          .fillMaxWidth()
       )
-    }
-  },
-    colors = TopAppBarDefaults.largeTopAppBarColors().copy(
+    },
+    navigationIcon = {
+      IconButton(onClick = onPop) {
+        Icon(
+          imageVector = Icons.Filled.ArrowBackIosNew,
+          contentDescription = "Back"
+        )
+      }
+    },
+    colors = TopAppBarDefaults.topAppBarColors().copy(
       containerColor = Color.Transparent,
-      scrolledContainerColor = Color.Transparent
+      scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+      navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
     ),
     modifier = Modifier
       .fillMaxWidth()
@@ -287,7 +324,7 @@ private fun LazyListScope.buildContent(event: EventDetail) {
     Text(
       "By ${event.ownerName}",
       style = MaterialTheme.typography.bodyMedium,
-      color = MaterialTheme.colorScheme.outline,
+      color = MaterialTheme.colorScheme.tertiary,
       modifier = Modifier.padding(horizontal = 24.dp)
     )
     Spacer(modifier = Modifier.height(16.dp))
@@ -333,7 +370,7 @@ private fun LazyListScope.buildContent(event: EventDetail) {
       )
       Spacer(modifier = Modifier.width(4.dp))
       Text(
-        "${formatDate(event.beginTime)} - ${formatDate(event.endTime)}",
+        text = mergeEventDates(event.beginTime, event.endTime),
         style = MaterialTheme.typography.labelLarge,
         color = MaterialTheme.colorScheme.tertiary,
       )
@@ -353,7 +390,7 @@ private fun LazyListScope.buildContent(event: EventDetail) {
       )
       Spacer(modifier = Modifier.width(4.dp))
       Text(
-        "Quota Remaining: ${event.quota - event.registrants}",
+        "Remaining Quota: ${event.quota - event.registrants}",
         style = MaterialTheme.typography.labelLarge,
         color = MaterialTheme.colorScheme.tertiary,
       )

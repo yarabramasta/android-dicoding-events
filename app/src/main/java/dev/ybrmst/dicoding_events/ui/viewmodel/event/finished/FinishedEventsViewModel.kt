@@ -37,8 +37,12 @@ class FinishedEventsViewModel(
       }
 
       is FinishedEventsUiEvent.OnQueryChanged -> {
-        _state.value = FinishedEventsUiState.Fetching.copy(query = event.query)
+        _state.value = FinishedEventsUiState.Initial.copy(query = event.query)
+
         searchJob?.cancel()
+
+        _state.value = FinishedEventsUiState.Fetching.copy(query = event.query)
+
         searchJob = viewModelScope.launch {
           delay(500L)
           if (event.query.isEmpty()) {
