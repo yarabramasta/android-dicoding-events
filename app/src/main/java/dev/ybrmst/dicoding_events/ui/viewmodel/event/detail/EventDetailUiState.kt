@@ -4,14 +4,14 @@ import androidx.compose.runtime.Immutable
 import dev.ybrmst.dicoding_events.domain.EventDetail
 
 @Immutable
-data class DetailState(
+data class EventDetailUiState(
   val event: EventDetail? = null,
   val isFetching: Boolean = false,
   val isRefreshing: Boolean = false,
   val isError: Boolean = false,
 ) {
   companion object {
-    private val Empty = DetailState(
+    private val Empty = EventDetailUiState(
       event = null,
       isFetching = false,
       isRefreshing = false,
@@ -26,7 +26,7 @@ data class DetailState(
 
     val Error = Empty.copy(isError = true)
 
-    fun loaded(event: EventDetail) = DetailState(
+    fun loaded(event: EventDetail) = EventDetailUiState(
       event = event,
       isFetching = false,
       isRefreshing = false,

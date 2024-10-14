@@ -60,8 +60,8 @@ import dev.ybrmst.dicoding_events.ui.composables.atoms.HtmlRenderer
 import dev.ybrmst.dicoding_events.ui.composables.atoms.ShimmerBox
 import dev.ybrmst.dicoding_events.ui.composables.atoms.shimmerBrush
 import dev.ybrmst.dicoding_events.ui.theme.AppTheme
-import dev.ybrmst.dicoding_events.ui.viewmodel.event.detail.DetailEvent
-import dev.ybrmst.dicoding_events.ui.viewmodel.event.detail.DetailViewModel
+import dev.ybrmst.dicoding_events.ui.viewmodel.event.detail.EventDetailUiEvent
+import dev.ybrmst.dicoding_events.ui.viewmodel.event.detail.EventDetailViewModel
 import org.koin.androidx.compose.koinViewModel
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -71,21 +71,21 @@ import java.util.Locale
 fun EventDetailScreen(
   eventId: Int,
   navController: NavHostController,
-  vm: DetailViewModel = koinViewModel(),
+  vm: EventDetailViewModel = koinViewModel(),
 ) {
   val state by vm.state.collectAsStateWithLifecycle()
   val initialFetch = rememberSaveable { mutableStateOf(false) }
 
   LaunchedEffect(Unit) {
     if (!initialFetch.value) {
-      vm.add(DetailEvent.OnFetch(eventId))
+      vm.add(EventDetailUiEvent.OnFetch(eventId))
       initialFetch.value = true
     }
   }
 
   PullToRefreshBox(
     isRefreshing = state.isRefreshing,
-    onRefresh = { vm.add(DetailEvent.OnRefresh(eventId)) },
+    onRefresh = { vm.add(EventDetailUiEvent.OnRefresh(eventId)) },
     modifier = Modifier.fillMaxSize()
   ) {
     EventDetailScreenContent(
@@ -93,7 +93,7 @@ fun EventDetailScreen(
       isLoading = state.isFetching || state.isRefreshing,
       isError = state.isError,
       onPop = { navController.navigateUp() },
-      onRetry = { vm.add(DetailEvent.OnRefresh(eventId)) },
+      onRetry = { vm.add(EventDetailUiEvent.OnRefresh(eventId)) },
     )
   }
 }
@@ -353,7 +353,7 @@ private fun LazyListScope.buildContent(event: EventDetail) {
       )
       Spacer(modifier = Modifier.width(4.dp))
       Text(
-        "Quota ${event.quota} | Registrants ${event.registrants}",
+        "Quota Remaining: ${event.quota - event.registrants}",
         style = MaterialTheme.typography.labelLarge,
         color = MaterialTheme.colorScheme.tertiary,
       )

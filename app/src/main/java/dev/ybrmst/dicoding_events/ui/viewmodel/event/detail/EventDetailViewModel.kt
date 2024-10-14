@@ -8,22 +8,22 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class DetailViewModel(
+class EventDetailViewModel(
   private val repo: EventsRepository,
 ) : ViewModel() {
-  private val _state = MutableStateFlow(DetailState.Initial)
+  private val _state = MutableStateFlow(EventDetailUiState.Initial)
 
-  val state: StateFlow<DetailState> get() = _state
+  val state: StateFlow<EventDetailUiState> get() = _state
 
-  fun add(event: DetailEvent) {
+  fun add(event: EventDetailUiEvent) {
     when (event) {
-      is DetailEvent.OnFetch -> {
-        _state.value = DetailState.Fetching
+      is EventDetailUiEvent.OnFetch -> {
+        _state.value = EventDetailUiState.Fetching
         fetchEventDetail(event.id)
       }
 
-      is DetailEvent.OnRefresh -> {
-        _state.value = DetailState.Refreshing
+      is EventDetailUiEvent.OnRefresh -> {
+        _state.value = EventDetailUiState.Refreshing
         fetchEventDetail(event.id)
       }
     }
@@ -33,10 +33,10 @@ class DetailViewModel(
     viewModelScope.launch {
       val res = repo.getEventDetail(id)
       _state.value = when (res) {
-        is Resource.Success -> res.data?.let { DetailState.loaded(it) }
-          ?: DetailState.Error
+        is Resource.Success -> res.data?.let { EventDetailUiState.loaded(it) }
+          ?: EventDetailUiState.Error
 
-        is Resource.Error -> DetailState.Error
+        is Resource.Error -> EventDetailUiState.Error
       }
     }
   }

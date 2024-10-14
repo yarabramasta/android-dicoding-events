@@ -12,22 +12,22 @@ import kotlinx.coroutines.launch
 
 class HomeViewModel(private val repo: EventsRepository) : ViewModel() {
 
-  private val _state = MutableStateFlow(HomeState.Initial)
+  private val _state = MutableStateFlow(HomeUiState.Initial)
 
-  val state: StateFlow<HomeState> get() = _state
+  val state: StateFlow<HomeUiState> get() = _state
 
   init {
     fetchEvents()
   }
 
-  fun add(event: HomeEvent) {
+  fun add(event: HomeUiEvent) {
     when (event) {
-      HomeEvent.OnFetch -> {
-        _state.value = HomeState.Fetching
+      HomeUiEvent.OnFetch -> {
+        _state.value = HomeUiState.Fetching
         fetchEvents()
       }
-      HomeEvent.OnRefresh -> {
-        _state.value = HomeState.Refreshing
+      HomeUiEvent.OnRefresh -> {
+        _state.value = HomeUiState.Refreshing
         fetchEvents()
       }
     }
@@ -52,9 +52,9 @@ class HomeViewModel(private val repo: EventsRepository) : ViewModel() {
         val didErrorResults = res1 is Resource.Error || res2 is Resource.Error
 
         _state.value = if (didErrorResults) {
-          HomeState.Error
+          HomeUiState.Error
         } else {
-          HomeState.loaded(
+          HomeUiState.loaded(
             highlights = res1.data ?: emptyList(),
             events = res2.data ?: emptyList()
           )

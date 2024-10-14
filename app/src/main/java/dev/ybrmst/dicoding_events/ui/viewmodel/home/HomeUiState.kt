@@ -4,7 +4,7 @@ import androidx.compose.runtime.Immutable
 import dev.ybrmst.dicoding_events.domain.EventPreview
 
 @Immutable
-data class HomeState(
+data class HomeUiState(
   val upcomingEvents: List<EventPreview>,
   val pastEvents: List<EventPreview>,
   val isFetching: Boolean = false,
@@ -13,7 +13,7 @@ data class HomeState(
 ) {
 
   companion object {
-    private val Empty = HomeState(
+    private val Empty = HomeUiState(
       upcomingEvents = emptyList(),
       pastEvents = emptyList(),
       isFetching = false,
@@ -33,7 +33,7 @@ data class HomeState(
       highlights: List<EventPreview>,
       events: List<EventPreview>,
     ) =
-      HomeState(
+      HomeUiState(
         upcomingEvents = highlights,
         pastEvents = events,
         isFetching = false,

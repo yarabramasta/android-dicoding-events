@@ -35,7 +35,7 @@ import dev.ybrmst.dicoding_events.ui.composables.event.FeaturedEventCard
 import dev.ybrmst.dicoding_events.ui.composables.event.buildEventErrorFallback
 import dev.ybrmst.dicoding_events.ui.composables.nav.EventDetailRoute
 import dev.ybrmst.dicoding_events.ui.theme.AppTheme
-import dev.ybrmst.dicoding_events.ui.viewmodel.home.HomeEvent
+import dev.ybrmst.dicoding_events.ui.viewmodel.home.HomeUiEvent
 import dev.ybrmst.dicoding_events.ui.viewmodel.home.HomeViewModel
 import org.koin.androidx.compose.koinViewModel
 
@@ -50,7 +50,7 @@ fun HomeScreen(
 
   PullToRefreshBox(
     isRefreshing = state.isRefreshing,
-    onRefresh = { vm.add(HomeEvent.OnRefresh) },
+    onRefresh = { vm.add(HomeUiEvent.OnRefresh) },
     modifier = modifier.fillMaxSize(),
   ) {
     HomeScreenContent(
@@ -58,8 +58,8 @@ fun HomeScreen(
       pastEvents = state.pastEvents,
       isLoading = state.isFetching || state.isRefreshing,
       isError = state.isError,
-      onCardClick = { navController.navigate(EventDetailRoute(it.id)) },
-      onRetry = { vm.add(HomeEvent.OnFetch) },
+      onEventClick = { navController.navigate(EventDetailRoute(it.id)) },
+      onRetry = { vm.add(HomeUiEvent.OnFetch) },
     )
   }
 }
@@ -71,7 +71,7 @@ private fun HomeScreenContent(
   pastEvents: List<EventPreview>,
   isLoading: Boolean = false,
   isError: Boolean = false,
-  onCardClick: (EventPreview) -> Unit = {},
+  onEventClick: (EventPreview) -> Unit = {},
   onRetry: () -> Unit = {},
 ) {
 
@@ -103,12 +103,12 @@ private fun HomeScreenContent(
       buildUpcomingEvents(
         isLoading = isLoading,
         events = upcomingEvents,
-        onCardClick = onCardClick
+        onCardClick = onEventClick
       )
       buildPastEvents(
         isLoading = isLoading,
         events = pastEvents,
-        onCardClick = onCardClick
+        onCardClick = onEventClick
       )
     } else {
       buildEventErrorFallback(onRetry)
@@ -150,7 +150,7 @@ fun LazyListScope.buildUpcomingEvents(
         }
       } else {
         if (events.isEmpty()) {
-          items(2) {
+          items(3) {
             ShimmerBox(animate = false, modifier = Modifier.size(240.dp))
           }
         } else {
@@ -186,7 +186,7 @@ fun LazyListScope.buildPastEvents(
     }
   } else {
     if (events.isEmpty()) {
-      items(2) { index ->
+      items(3) { index ->
         if (index == 0) {
           Spacer(modifier = Modifier.height(16.dp))
           Text(

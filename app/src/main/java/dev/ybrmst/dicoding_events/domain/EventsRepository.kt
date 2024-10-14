@@ -5,7 +5,7 @@ import dev.ybrmst.dicoding_events.data.Resource
 interface EventsRepository {
   suspend fun getEvents(
     active: Int? = -1,
-    limit: Int? = null,
+    limit: Int = 20,
     query: String? = null,
   ): Resource<List<EventPreview>>
 

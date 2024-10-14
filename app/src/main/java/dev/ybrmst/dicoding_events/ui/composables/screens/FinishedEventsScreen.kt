@@ -10,34 +10,34 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import dev.ybrmst.dicoding_events.ui.composables.event.SearchEvents
 import dev.ybrmst.dicoding_events.ui.composables.nav.EventDetailRoute
-import dev.ybrmst.dicoding_events.ui.viewmodel.event.upcoming.UpcomingEventsUiEvent
-import dev.ybrmst.dicoding_events.ui.viewmodel.event.upcoming.UpcomingEventsViewModel
+import dev.ybrmst.dicoding_events.ui.viewmodel.event.finished.FinishedEventsUiEvent
+import dev.ybrmst.dicoding_events.ui.viewmodel.event.finished.FinishedEventsViewModel
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UpcomingEventsScreen(
+fun FinishedEventsScreen(
   modifier: Modifier = Modifier,
   navController: NavHostController,
-  vm: UpcomingEventsViewModel = koinViewModel(),
+  vm: FinishedEventsViewModel = koinViewModel(),
 ) {
   val state by vm.state.collectAsStateWithLifecycle()
 
   PullToRefreshBox(
     isRefreshing = state.isRefreshing,
-    onRefresh = { vm.add(UpcomingEventsUiEvent.OnRefresh) },
+    onRefresh = { vm.add(FinishedEventsUiEvent.OnRefresh) },
     modifier = modifier.fillMaxSize(),
   ) {
     SearchEvents(
-      eventsType = "upcoming",
+      eventsType = "finished",
       events = state.events,
       onEventClick = { navController.navigate(EventDetailRoute(it)) },
       isLoading = state.isFetching || state.isRefreshing,
       isError = state.isError,
       searchQuery = state.query,
-      onSearch = { vm.add(UpcomingEventsUiEvent.OnQueryChanged(it)) },
-      onClearSearch = { vm.add(UpcomingEventsUiEvent.OnQueryCleared) },
-      onRetry = { vm.add(UpcomingEventsUiEvent.OnFetch) },
+      onSearch = { vm.add(FinishedEventsUiEvent.OnQueryChanged(it)) },
+      onClearSearch = { vm.add(FinishedEventsUiEvent.OnQueryCleared) },
+      onRetry = { vm.add(FinishedEventsUiEvent.OnFetch) },
     )
   }
 }

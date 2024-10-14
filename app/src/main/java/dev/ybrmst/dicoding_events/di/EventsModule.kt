@@ -3,7 +3,9 @@ package dev.ybrmst.dicoding_events.di
 import dev.ybrmst.dicoding_events.data.network.EventsApi
 import dev.ybrmst.dicoding_events.data.network.EventsRepositoryImpl
 import dev.ybrmst.dicoding_events.domain.EventsRepository
-import dev.ybrmst.dicoding_events.ui.viewmodel.event.detail.DetailViewModel
+import dev.ybrmst.dicoding_events.ui.viewmodel.event.detail.EventDetailViewModel
+import dev.ybrmst.dicoding_events.ui.viewmodel.event.finished.FinishedEventsViewModel
+import dev.ybrmst.dicoding_events.ui.viewmodel.event.upcoming.UpcomingEventsViewModel
 import dev.ybrmst.dicoding_events.ui.viewmodel.home.HomeViewModel
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -28,7 +30,11 @@ val eventsModule = module {
 
   viewModel { HomeViewModel(get()) }
 
-  viewModel { DetailViewModel(get()) }
+  viewModel { EventDetailViewModel(get()) }
+
+  viewModel { UpcomingEventsViewModel(get()) }
+
+  viewModel { FinishedEventsViewModel(get()) }
 }
 
 private fun getHttpClient(): OkHttpClient {

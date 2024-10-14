@@ -17,8 +17,8 @@ class EventsRepositoryImpl(
 ) : EventsRepository {
   override suspend fun getEvents(
     active: Int?,
-    limit: Int?,
-    query: String?
+    limit: Int,
+    query: String?,
   ): Resource<List<EventPreview>> {
     return try {
       val res = api.getEvents(
