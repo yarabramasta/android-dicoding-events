@@ -179,7 +179,7 @@ private fun EventDetailScreenContent(
           }
         }
         when {
-          isLoading || event == null -> buildLoadingFallback()
+          isLoading -> buildLoadingFallback()
 
           isError -> {
             item {
