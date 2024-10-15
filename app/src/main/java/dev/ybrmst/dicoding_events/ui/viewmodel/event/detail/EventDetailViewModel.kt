@@ -4,9 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.ybrmst.dicoding_events.data.Resource
 import dev.ybrmst.dicoding_events.domain.EventsRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class EventDetailViewModel(
   private val repo: EventsRepository,
@@ -31,7 +33,8 @@ class EventDetailViewModel(
 
   private fun fetchEventDetail(id: Int) {
     viewModelScope.launch {
-      val res = repo.getEventDetail(id)
+      val res = withContext(Dispatchers.IO) { repo.getEventDetail(id) }
+
       _state.value = when (res) {
         is Resource.Success -> res.data?.let { EventDetailUiState.loaded(it) }
           ?: EventDetailUiState.Error

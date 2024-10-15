@@ -4,11 +4,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.ybrmst.dicoding_events.data.Resource
 import dev.ybrmst.dicoding_events.domain.EventsRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class FinishedEventsViewModel(
   private val repo: EventsRepository,
@@ -62,7 +64,8 @@ class FinishedEventsViewModel(
 
   private fun fetchEvents() {
     viewModelScope.launch {
-      val res = repo.getEvents(active = 0)
+      val res = withContext(Dispatchers.IO) { repo.getEvents(active = 0) }
+
       _state.value = when (res) {
         is Resource.Success -> FinishedEventsUiState.loaded(
           res.data ?: emptyList()
@@ -75,7 +78,10 @@ class FinishedEventsViewModel(
 
   private fun searchEvents(q: String) {
     viewModelScope.launch {
-      val res = repo.getEvents(active = 0, query = q)
+      val res = withContext(Dispatchers.IO) {
+        repo.getEvents(active = 0, query = q)
+      }
+
       _state.value = when (res) {
         is Resource.Success -> FinishedEventsUiState.loaded(
           res.data ?: emptyList()

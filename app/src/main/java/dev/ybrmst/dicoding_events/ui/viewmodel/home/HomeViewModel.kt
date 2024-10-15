@@ -4,11 +4,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.ybrmst.dicoding_events.data.Resource
 import dev.ybrmst.dicoding_events.domain.EventsRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class HomeViewModel(private val repo: EventsRepository) : ViewModel() {
 
@@ -26,6 +27,7 @@ class HomeViewModel(private val repo: EventsRepository) : ViewModel() {
         _state.value = HomeUiState.Fetching
         fetchEvents()
       }
+
       HomeUiEvent.OnRefresh -> {
         _state.value = HomeUiState.Refreshing
         fetchEvents()
@@ -34,18 +36,12 @@ class HomeViewModel(private val repo: EventsRepository) : ViewModel() {
   }
 
   private fun fetchEvents() {
-
     viewModelScope.launch {
+      val result = withContext(Dispatchers.IO) {
+        val upcoming = async { repo.getEvents(active = 1, limit = 5) }
+        val finished = async { repo.getEvents(active = 0, limit = 5) }
 
-      val result = coroutineScope {
-        val upcomingEvents = async {
-          repo.getEvents(active = 1, limit = 5)
-        }.await()
-        val pastEvents = async {
-          repo.getEvents(active = 0, limit = 5)
-        }.await()
-
-        Pair(upcomingEvents, pastEvents)
+        Pair(upcoming.await(), finished.await())
       }
 
       result.let { (res1, res2) ->
