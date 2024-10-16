@@ -1,6 +1,6 @@
 package dev.ybrmst.dicoding_events.ui.viewmodel.event.upcoming
 
-import dev.ybrmst.dicoding_events.domain.EventPreview
+import dev.ybrmst.dicoding_events.domain.model.EventPreview
 
 data class UpcomingEventsUiState(
   val events: List<EventPreview> = emptyList(),

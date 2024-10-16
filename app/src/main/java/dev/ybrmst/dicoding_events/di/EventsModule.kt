@@ -1,8 +1,8 @@
 package dev.ybrmst.dicoding_events.di
 
 import dev.ybrmst.dicoding_events.data.network.EventsApi
-import dev.ybrmst.dicoding_events.data.network.EventsRepositoryImpl
-import dev.ybrmst.dicoding_events.domain.EventsRepository
+import dev.ybrmst.dicoding_events.data.repo.EventRepositoryImpl
+import dev.ybrmst.dicoding_events.domain.repo.EventRepository
 import dev.ybrmst.dicoding_events.ui.viewmodel.event.detail.EventDetailViewModel
 import dev.ybrmst.dicoding_events.ui.viewmodel.event.finished.FinishedEventsViewModel
 import dev.ybrmst.dicoding_events.ui.viewmodel.event.upcoming.UpcomingEventsViewModel
@@ -26,7 +26,7 @@ val eventsModule = module {
       .build()
       .create(EventsApi::class.java)
   }
-  single<EventsRepository> { EventsRepositoryImpl(get()) }
+  single<EventRepository> { EventRepositoryImpl(get()) }
 
   viewModel { HomeViewModel(get()) }
 

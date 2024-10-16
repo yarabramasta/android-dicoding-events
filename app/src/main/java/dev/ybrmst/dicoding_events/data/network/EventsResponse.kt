@@ -1,6 +1,6 @@
 package dev.ybrmst.dicoding_events.data.network
 
-import dev.ybrmst.dicoding_events.domain.EventPreview
+import dev.ybrmst.dicoding_events.domain.model.EventPreview
 
 data class EventsResponse(
   val error: Boolean,

@@ -3,7 +3,7 @@ package dev.ybrmst.dicoding_events.ui.viewmodel.event.detail
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.ybrmst.dicoding_events.data.Resource
-import dev.ybrmst.dicoding_events.domain.EventsRepository
+import dev.ybrmst.dicoding_events.domain.repo.EventRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class EventDetailViewModel(
-  private val repo: EventsRepository,
+  private val repo: EventRepository,
 ) : ViewModel() {
   private val _state = MutableStateFlow(EventDetailUiState.Initial)
 

@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import dev.ybrmst.dicoding_events.ui.composables.nav.AppNavHost
+import dev.ybrmst.dicoding_events.ui.composable.nav.AppNavHost
 import dev.ybrmst.dicoding_events.ui.theme.AppTheme
 
 class MainActivity : ComponentActivity() {

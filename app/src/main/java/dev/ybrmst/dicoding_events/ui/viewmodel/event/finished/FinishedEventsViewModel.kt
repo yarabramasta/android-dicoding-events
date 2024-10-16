@@ -3,7 +3,7 @@ package dev.ybrmst.dicoding_events.ui.viewmodel.event.finished
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.ybrmst.dicoding_events.data.Resource
-import dev.ybrmst.dicoding_events.domain.EventsRepository
+import dev.ybrmst.dicoding_events.domain.repo.EventRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class FinishedEventsViewModel(
-  private val repo: EventsRepository,
+  private val repo: EventRepository,
 ) : ViewModel() {
 
   private val _state = MutableStateFlow(FinishedEventsUiState.Initial)

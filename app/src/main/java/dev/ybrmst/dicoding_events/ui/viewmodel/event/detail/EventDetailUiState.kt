@@ -1,7 +1,7 @@
 package dev.ybrmst.dicoding_events.ui.viewmodel.event.detail
 
 import androidx.compose.runtime.Immutable
-import dev.ybrmst.dicoding_events.domain.EventDetail
+import dev.ybrmst.dicoding_events.domain.model.EventDetail
 
 @Immutable
 data class EventDetailUiState(

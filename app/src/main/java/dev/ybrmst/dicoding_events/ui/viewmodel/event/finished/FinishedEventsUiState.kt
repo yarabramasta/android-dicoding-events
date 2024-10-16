@@ -1,6 +1,6 @@
 package dev.ybrmst.dicoding_events.ui.viewmodel.event.finished
 
-import dev.ybrmst.dicoding_events.domain.EventPreview
+import dev.ybrmst.dicoding_events.domain.model.EventPreview
 
 data class FinishedEventsUiState(
   val events: List<EventPreview> = emptyList(),
