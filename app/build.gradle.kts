@@ -56,6 +56,7 @@ android {
 
 dependencies {
 
+  implementation(libs.kotlinx.serialization.json)
   implementation(libs.androidx.core.ktx)
   implementation(libs.androidx.lifecycle.runtime.ktx)
   implementation(libs.androidx.activity.compose)
@@ -67,7 +68,7 @@ dependencies {
   implementation(libs.androidx.compose.ui.text.google.fonts)
   implementation(libs.androidx.compose.material.iconsExtended)
   implementation(libs.androidx.navigation.compose)
-  implementation(libs.kotlinx.serialization.json)
+  implementation(libs.androidx.datastore.preferences)
 
   testImplementation(libs.junit)
   androidTestImplementation(libs.androidx.junit)

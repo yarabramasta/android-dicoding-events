@@ -2,18 +2,18 @@ package dev.ybrmst.dicoding_events.ui.composables.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Error
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
@@ -22,15 +22,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import dev.ybrmst.dicoding_events.domain.errors.BaseError
 import dev.ybrmst.dicoding_events.domain.models.EventPreview
+import dev.ybrmst.dicoding_events.ui.composables.atoms.EmptyItemsFallback
+import dev.ybrmst.dicoding_events.ui.composables.atoms.ErrorFallback
+import dev.ybrmst.dicoding_events.ui.composables.atoms.ShimmerBox
+import dev.ybrmst.dicoding_events.ui.composables.atoms.ShimmerItem
 import dev.ybrmst.dicoding_events.ui.composables.rememberFlowWithLifecycle
+import dev.ybrmst.dicoding_events.ui.theme.AppTheme
 import dev.ybrmst.dicoding_events.ui.viewmodels.HomeReducer
 import dev.ybrmst.dicoding_events.ui.viewmodels.HomeViewModel
 
@@ -72,8 +77,8 @@ fun HomeScreen(
       modifier = modifier,
       isLoading = state.isFetching || state.isRefreshing,
       hasError = state.error != null,
-      errorMessage = state.error?.message,
-      onErrorRetry = { vm.onRefresh() },
+      error = state.error,
+      onRetry = { vm.onRefresh() },
       upcomingEvents = state.upcomingEvents,
       finishedEvents = state.finishedEvents,
       onEventClick = { eventId -> vm.onEventClick(eventId) }
@@ -86,8 +91,8 @@ private fun HomeScreenContent(
   modifier: Modifier = Modifier,
   isLoading: Boolean,
   hasError: Boolean,
-  errorMessage: String? = null,
-  onErrorRetry: () -> Unit,
+  error: BaseError?,
+  onRetry: () -> Unit,
   upcomingEvents: List<EventPreview>,
   finishedEvents: List<EventPreview>,
   onEventClick: (Int) -> Unit,
@@ -95,43 +100,99 @@ private fun HomeScreenContent(
   Box(modifier = modifier.fillMaxSize()) {
     when {
       isLoading -> {
-        // TODO: Show loading indicator
+        LazyColumn {
+          buildHeadline()
+          item {
+            Text(
+              "Upcoming Events",
+              style = MaterialTheme.typography.titleMedium,
+              modifier = Modifier.padding(horizontal = 16.dp)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            LazyRow(
+              horizontalArrangement = Arrangement.spacedBy(16.dp),
+              contentPadding = PaddingValues(horizontal = 16.dp)
+            ) {
+              items(upcomingEvents.size) {
+                ShimmerBox(modifier = Modifier.size(240.dp))
+              }
+            }
+            Spacer(modifier = Modifier.height(24.dp))
+          }
+          item {
+            Text(
+              "Finished Events",
+              style = MaterialTheme.typography.titleMedium,
+              modifier = Modifier.padding(horizontal = 16.dp)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+          }
+          items(finishedEvents.size) {
+            ShimmerItem()
+          }
+          item {
+            Spacer(modifier = Modifier.height(24.dp))
+          }
+        }
       }
 
       hasError -> {
-        Column(
-          verticalArrangement = Arrangement.Center,
-          horizontalAlignment = Alignment.CenterHorizontally,
-          modifier = Modifier.fillMaxSize(),
-        ) {
-          Icon(
-            imageVector = Icons.Default.Error,
-            contentDescription = "Error",
-            tint = MaterialTheme.colorScheme.onErrorContainer,
-            modifier = Modifier.size(32.dp)
-          )
-          Spacer(modifier = Modifier.height(16.dp))
-          Text(
-            text = errorMessage ?: "An error occurred",
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onErrorContainer,
-          )
-          Spacer(modifier = Modifier.height(16.dp))
-          FilledTonalButton(
-            onClick = onErrorRetry,
-            colors = ButtonDefaults.filledTonalButtonColors().copy(
-              containerColor = MaterialTheme.colorScheme.errorContainer,
-              contentColor = MaterialTheme.colorScheme.onErrorContainer
-            )
-          ) {
-            Text("Retry")
-          }
-        }
+        ErrorFallback(message = error?.message, onRetry = onRetry)
+      }
+
+      upcomingEvents.isEmpty() || finishedEvents.isEmpty() -> {
+        EmptyItemsFallback(onRefresh = onRetry)
       }
 
       else -> {
         // TODO: Show upcoming and finished events
       }
+    }
+  }
+}
+
+private fun LazyListScope.buildHeadline() {
+  item {
+    Text(
+      "Dicoding Events",
+      style = MaterialTheme.typography.titleLarge,
+      color = MaterialTheme.colorScheme.primary,
+      modifier = Modifier.padding(horizontal = 16.dp)
+    )
+    Spacer(modifier = Modifier.height(8.dp))
+    Text(
+      "Discover all events held by Dicoding from the upcoming to the finished ones.",
+      style = MaterialTheme.typography.bodyLarge,
+      color = MaterialTheme.colorScheme.onSurfaceVariant,
+      modifier = Modifier.padding(horizontal = 16.dp)
+    )
+    Spacer(modifier = Modifier.height(24.dp))
+  }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+private fun HomeScreenLoading() {
+  val events = listOf(
+    EventPreview.fake(),
+    EventPreview.fake(),
+    EventPreview.fake(),
+    EventPreview.fake(),
+    EventPreview.fake(),
+  )
+
+  AppTheme {
+    Scaffold {
+      HomeScreenContent(
+        isLoading = true,
+        hasError = false,
+        error = null,
+        onRetry = {},
+        upcomingEvents = events.take(2),
+        finishedEvents = events.take(3),
+        onEventClick = {},
+        modifier = Modifier.padding(it)
+      )
     }
   }
 }

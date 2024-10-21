@@ -23,6 +23,7 @@ import androidx.navigation.NavController
 import dev.ybrmst.dicoding_events.ui.composables.atoms.BottomNavItem
 import dev.ybrmst.dicoding_events.ui.composables.atoms.MainScreenBottomNavBar
 import dev.ybrmst.dicoding_events.ui.composables.atoms.Placeholder
+import dev.ybrmst.dicoding_events.ui.theme.AppTheme
 
 @Composable
 fun MainScreen(navController: NavController) {
@@ -78,9 +79,7 @@ private fun MainScreenContent(
     )
   )
 
-  var currentActiveIndex by rememberSaveable {
-    mutableIntStateOf(0)
-  }
+  var currentActiveIndex by rememberSaveable { mutableIntStateOf(0) }
 
   Scaffold(
     bottomBar = {
@@ -101,10 +100,12 @@ private fun MainScreenContent(
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 private fun MainScreenPreview() {
-  MainScreenContent { activeScreen, paddingValues ->
-    Placeholder(
-      label = "Current Screen: $activeScreen",
-      modifier = Modifier.padding(paddingValues)
-    )
+  AppTheme {
+    MainScreenContent { activeScreen, paddingValues ->
+      Placeholder(
+        label = "Current Screen: $activeScreen",
+        modifier = Modifier.padding(paddingValues)
+      )
+    }
   }
 }

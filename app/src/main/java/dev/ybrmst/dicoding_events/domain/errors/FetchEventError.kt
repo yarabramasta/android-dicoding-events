@@ -1,18 +1,24 @@
 package dev.ybrmst.dicoding_events.domain.errors
 
-sealed class FetchEventError : Throwable() {
-  data class InvalidResponse(override val message: String) : FetchEventError()
+sealed class FetchEventError(code: ErrorCodes, message: String) :
+  BaseError(message = message, code = code) {
 
-  data class NetworkError(override val message: String) : FetchEventError()
+  class BadRequest(message: String) : FetchEventError(
+    code = ErrorCodes.BAD_REQUEST,
+    message = message,
+  )
 
-  data class Unknown(override val message: String) : FetchEventError()
+  class NetworkError(message: String) : FetchEventError(
+    code = ErrorCodes.NETWORK_ERROR,
+    message = message,
+  )
 
-  companion object {
-    fun fromThrowable(throwable: Throwable): FetchEventError {
-      return when (throwable) {
-        is FetchEventError -> throwable
-        else -> Unknown(throwable.message ?: "Unknown error")
-      }
-    }
+  class UnknownError(message: String) : FetchEventError(
+    code = ErrorCodes.UNKNOWN_ERROR,
+    message = message,
+  )
+
+  override fun toString(): String {
+    return "FetchEventError(code=$code, message=$message)"
   }
 }
