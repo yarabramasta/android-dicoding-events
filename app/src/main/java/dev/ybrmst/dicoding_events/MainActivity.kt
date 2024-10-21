@@ -4,8 +4,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import dev.ybrmst.dicoding_events.ui.theme.AppTheme
 import dagger.hilt.android.AndroidEntryPoint
+import dev.ybrmst.dicoding_events.ui.theme.AppTheme
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -13,7 +13,9 @@ class MainActivity : ComponentActivity() {
     super.onCreate(savedInstanceState)
     enableEdgeToEdge()
     setContent {
-      AppTheme {}
+      AppTheme {
+        MainNavigation()
+      }
     }
   }
 }

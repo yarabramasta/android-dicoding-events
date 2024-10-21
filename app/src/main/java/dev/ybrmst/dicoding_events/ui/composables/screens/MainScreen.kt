@@ -1,0 +1,110 @@
+package dev.ybrmst.dicoding_events.ui.composables.screens
+
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Explore
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.Explore
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.Star
+import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavController
+import dev.ybrmst.dicoding_events.ui.composables.atoms.BottomNavItem
+import dev.ybrmst.dicoding_events.ui.composables.atoms.MainScreenBottomNavBar
+import dev.ybrmst.dicoding_events.ui.composables.atoms.Placeholder
+
+@Composable
+fun MainScreen(navController: NavController) {
+  MainScreenContent { activeScreen, innerPadding ->
+    when (activeScreen) {
+      "Home" -> HomeScreen(
+        navController = navController,
+        modifier = Modifier.padding(innerPadding)
+      )
+
+      "Discover" -> Placeholder(
+        modifier = Modifier.padding(innerPadding)
+      )
+
+      "Favorites" -> Placeholder(
+        modifier = Modifier.padding(innerPadding)
+      )
+
+      "Settings" -> Placeholder(
+        modifier = Modifier.padding(innerPadding)
+      )
+    }
+  }
+}
+
+@Composable
+private fun MainScreenContent(
+  content: @Composable (
+    activeScreen: String,
+    paddingValues: PaddingValues,
+  ) -> Unit,
+) {
+  val bottomNavItems = listOf(
+    BottomNavItem(
+      label = "Home",
+      selectedIcon = Icons.Filled.Home,
+      icon = Icons.Outlined.Home
+    ),
+    BottomNavItem(
+      label = "Discover",
+      selectedIcon = Icons.Filled.Explore,
+      icon = Icons.Outlined.Explore
+    ),
+    BottomNavItem(
+      label = "Favorites",
+      selectedIcon = Icons.Filled.Star,
+      icon = Icons.Outlined.Star
+    ),
+    BottomNavItem(
+      label = "Settings",
+      selectedIcon = Icons.Filled.Settings,
+      icon = Icons.Outlined.Settings
+    )
+  )
+
+  var currentActiveIndex by rememberSaveable {
+    mutableIntStateOf(0)
+  }
+
+  Scaffold(
+    bottomBar = {
+      MainScreenBottomNavBar(
+        items = bottomNavItems,
+        selectedItemIndex = currentActiveIndex,
+        onItemSelected = { index -> currentActiveIndex = index }
+      )
+    }
+  ) { innerPadding ->
+    content(
+      bottomNavItems[currentActiveIndex].label,
+      innerPadding,
+    )
+  }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+private fun MainScreenPreview() {
+  MainScreenContent { activeScreen, paddingValues ->
+    Placeholder(
+      label = "Current Screen: $activeScreen",
+      modifier = Modifier.padding(paddingValues)
+    )
+  }
+}
