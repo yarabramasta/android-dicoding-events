@@ -8,15 +8,17 @@ sealed class FetchEventError(code: ErrorCodes, message: String) :
     message = message,
   )
 
-  class NetworkError(message: String) : FetchEventError(
-    code = ErrorCodes.NETWORK_ERROR,
-    message = message,
-  )
+  class NetworkError(message: String = "Welp :( we couldn't fetch events.\nPlease check your internet connection...") :
+    FetchEventError(
+      code = ErrorCodes.NETWORK_ERROR,
+      message = message,
+    )
 
-  class UnknownError(message: String) : FetchEventError(
-    code = ErrorCodes.UNKNOWN_ERROR,
-    message = message,
-  )
+  class UnknownError(message: String = "Uh oh! Something went wrong.\nPlease try again...") :
+    FetchEventError(
+      code = ErrorCodes.UNKNOWN_ERROR,
+      message = message,
+    )
 
   override fun toString(): String {
     return "FetchEventError(code=$code, message=$message)"

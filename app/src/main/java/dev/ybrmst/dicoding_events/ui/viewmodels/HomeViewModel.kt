@@ -2,6 +2,7 @@ package dev.ybrmst.dicoding_events.ui.viewmodels
 
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dev.ybrmst.dicoding_events.domain.models.EventPreview
 import dev.ybrmst.dicoding_events.domain.models.Result
 import dev.ybrmst.dicoding_events.domain.repositories.EventsRepository
 import dev.ybrmst.dicoding_events.ui.lib.BaseViewModel
@@ -30,8 +31,12 @@ class HomeViewModel @Inject constructor(
     sendEffect(HomeReducer.HomeEffect.NavigateToEventDetail(eventId))
   }
 
+  fun onFavoriteClick(event: EventPreview) {
+    sendEventForEffect(HomeReducer.HomeEvent.OnFavoriteClick(event))
+  }
+
   private suspend fun fetchEvents(refresh: Boolean = false) = coroutineScope {
-    val events = repo.fetchEvents()
+    val events = repo.fetchUpcomingFinishedEvents()
 
     events.collect { result ->
       when (result) {

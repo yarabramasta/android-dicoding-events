@@ -10,5 +10,5 @@ interface EventsRepository {
 
   suspend fun fetchFinishedEvents(q: String = ""): Flow<Result<List<EventPreview>, FetchEventError>>
 
-  suspend fun fetchEvents(): Flow<Result<Pair<List<EventPreview>, List<EventPreview>>, FetchEventError>>
+  suspend fun fetchUpcomingFinishedEvents(): Flow<Result<Pair<List<EventPreview>, List<EventPreview>>, FetchEventError>>
 }

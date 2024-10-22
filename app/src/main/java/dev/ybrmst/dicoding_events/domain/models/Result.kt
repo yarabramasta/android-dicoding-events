@@ -6,11 +6,23 @@ sealed class Result<out D, out E> {
   data object Loading : Result<Nothing, Nothing>()
 
   fun isSuccess(): Boolean = this is Success
-  fun hasError(): Boolean = this is Error
+  fun isError(): Boolean = this is Error
   fun isLoading(): Boolean = this is Loading
 
   fun getOrNull(): D? = (this as? Success)?.data
   fun errorOrNull(): E? = (this as? Error)?.error
+
+  fun whenOrElse(
+    onSuccess: (D) -> Unit = {},
+    onError: (E) -> Unit = {},
+    onLoading: () -> Unit = {},
+  ) {
+    when (this) {
+      is Success -> onSuccess(data)
+      is Error -> onError(error)
+      Loading -> onLoading()
+    }
+  }
 
   override fun toString(): String {
     return when (this) {
