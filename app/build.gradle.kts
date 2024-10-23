@@ -8,11 +8,11 @@ plugins {
 }
 
 android {
-  namespace = "dev.ybrmst.dicoding_events"
+  namespace = "dev.ybrmst.dicodingevents"
   compileSdk = 34
 
   defaultConfig {
-    applicationId = "dev.ybrmst.dicoding_events"
+    applicationId = "dev.ybrmst.dicodingevents"
     minSdk = 24
     targetSdk = 34
     versionCode = 1
