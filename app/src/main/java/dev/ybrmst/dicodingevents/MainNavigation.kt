@@ -15,12 +15,12 @@ fun MainNavigation() {
 
   NavHost(
     navController = navController,
-    startDestination = AppRoute.Main
+    startDestination = AppRoute.MainPage
   ) {
-    composable<AppRoute.Main> { MainScreen(navController) }
+    composable<AppRoute.MainPage> { MainScreen(navController) }
 
-    composable<AppRoute.EventDetail> {
-      val eventId = it.toRoute<AppRoute.EventDetail>().eventId
+    composable<AppRoute.EventDetailPage> {
+      val eventId = it.toRoute<AppRoute.EventDetailPage>().eventId
       EventDetailScreen(
         eventId = eventId,
         navController = navController,
@@ -31,8 +31,8 @@ fun MainNavigation() {
 
 sealed class AppRoute {
   @Serializable
-  data object Main : AppRoute()
+  data object MainPage : AppRoute()
 
   @Serializable
-  data class EventDetail(val eventId: Int) : AppRoute()
+  data class EventDetailPage(val eventId: Int) : AppRoute()
 }
