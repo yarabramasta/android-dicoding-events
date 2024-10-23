@@ -93,7 +93,7 @@ dependencies {
   implementation(libs.okhttp)
   implementation(libs.okhttp.loggingInterceptor)
   implementation(libs.retrofit)
-  implementation(libs.retrofit.gson)
+  implementation(libs.retrofit.kotlinx.serialization)
 
   implementation(libs.coil)
   implementation(libs.coil.networkOkhttp)

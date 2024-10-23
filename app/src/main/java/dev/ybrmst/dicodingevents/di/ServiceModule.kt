@@ -8,10 +8,12 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import dev.ybrmst.dicodingevents.data.local.PreferenceService
 import dev.ybrmst.dicodingevents.data.network.DicodingEventsApiService
+import kotlinx.serialization.json.Json
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import java.util.concurrent.TimeUnit
 
 @Module
@@ -42,7 +44,9 @@ object ServiceModule {
     Retrofit
       .Builder()
       .baseUrl(baseUrl)
-      .addConverterFactory(GsonConverterFactory.create())
+      .addConverterFactory(
+        Json.asConverterFactory("application/json; charset=UTF8".toMediaType())
+      )
       .client(okHttp)
       .build()
 
