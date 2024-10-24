@@ -25,6 +25,7 @@ data class EventDetail(
   val quota: Int,
   val registrants: Int,
   val link: String,
+  val isFavorite: Boolean = false,
 
   @Serializable(with = DateTimeParser::class)
   @SerialName("beginTime")
@@ -98,4 +99,14 @@ fun EventDetail.getDisplayDate(): String {
 
     return "$beginDate - $endDate"
   }
+}
+
+fun EventDetail.toPreview(): EventPreview {
+  return EventPreview(
+    id = id,
+    name = name,
+    summary = summary,
+    cityName = cityName,
+    imageLogo = imageLogo,
+  )
 }

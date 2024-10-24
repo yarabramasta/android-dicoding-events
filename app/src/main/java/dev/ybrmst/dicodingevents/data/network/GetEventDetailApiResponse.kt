@@ -4,8 +4,8 @@ import dev.ybrmst.dicodingevents.domain.models.EventDetail
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class GetEventsApiResponse(
+data class GetEventDetailApiResponse(
   val error: Boolean,
   val message: String?,
-  val listEvents: List<EventDetail>,
+  val event: EventDetail,
 )

@@ -73,6 +73,7 @@ dependencies {
   implementation(libs.androidx.compose.material.iconsExtended)
   implementation(libs.androidx.navigation.compose)
   implementation(libs.androidx.datastore.preferences)
+  coreLibraryDesugaring(libs.android.desugar.jdk)
 
   testImplementation(libs.junit)
   androidTestImplementation(libs.androidx.junit)
@@ -97,5 +98,8 @@ dependencies {
 
   implementation(libs.coil)
   implementation(libs.coil.networkOkhttp)
-  coreLibraryDesugaring(libs.android.desugar.jdk)
+
+  implementation(libs.sandwich)
+  implementation(libs.sandwich.retrofit)
+  implementation(libs.sandwich.retrofit.serialization)
 }

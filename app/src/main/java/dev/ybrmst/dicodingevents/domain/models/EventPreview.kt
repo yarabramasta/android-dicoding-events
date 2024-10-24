@@ -1,7 +1,10 @@
 package dev.ybrmst.dicodingevents.domain.models
 
+import dev.ybrmst.dicodingevents.data.local.FavoriteEventEntity
+import kotlinx.serialization.Serializable
 import kotlin.random.Random
 
+@Serializable
 data class EventPreview(
   val id: Int,
   val name: String,
@@ -19,4 +22,14 @@ data class EventPreview(
       imageLogo = "https://placehold.co/400.png"
     )
   }
+}
+
+fun EventPreview.toEntity(): FavoriteEventEntity {
+  return FavoriteEventEntity(
+    eventId = id,
+    name = name,
+    summary = summary,
+    cityName = cityName,
+    imageLogo = imageLogo,
+  )
 }

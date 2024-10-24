@@ -21,6 +21,7 @@ hiltNavigationCompose = "1.2.0"
 datastore = "1.1.1"
 datetime = "0.6.1"
 desugarJdk = "2.1.2"
+sandwich = "2.0.10"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -56,6 +57,9 @@ retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = 
 retrofit-kotlinx-serialization = { group = "com.squareup.retrofit2", name = "converter-kotlinx-serialization", version.ref = "retrofit" }
 coil = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
 coil-networkOkhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
+sandwich = { group = "com.github.skydoves", name = "sandwich", version.ref = "sandwich" }
+sandwich-retrofit = { group = "com.github.skydoves", name = "sandwich-retrofit", version.ref = "sandwich" }
+sandwich-retrofit-serialization = { group = "com.github.skydoves", name = "sandwich-retrofit-serialization", version.ref = "sandwich" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
