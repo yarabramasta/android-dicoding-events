@@ -1,5 +1,6 @@
 package dev.ybrmst.dicodingevents.presentation.ui.composables.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -12,14 +13,24 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import dev.ybrmst.dicodingevents.AppRoute
 import dev.ybrmst.dicodingevents.domain.models.EventPreview
 import dev.ybrmst.dicodingevents.presentation.ui.composables.atoms.EmptyItemsFallback
 import dev.ybrmst.dicodingevents.presentation.ui.composables.atoms.ErrorFallback
@@ -27,14 +38,71 @@ import dev.ybrmst.dicodingevents.presentation.ui.composables.atoms.EventPreviewC
 import dev.ybrmst.dicodingevents.presentation.ui.composables.atoms.EventPreviewListItem
 import dev.ybrmst.dicodingevents.presentation.ui.composables.atoms.ShimmerBox
 import dev.ybrmst.dicodingevents.presentation.ui.composables.atoms.ShimmerItem
+import dev.ybrmst.dicodingevents.presentation.ui.composables.rememberFlowWithLifecycle
 import dev.ybrmst.dicodingevents.presentation.ui.theme.AppTheme
+import dev.ybrmst.dicodingevents.presentation.viewmodel.HomeContract
+import dev.ybrmst.dicodingevents.presentation.viewmodel.HomeViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
   modifier: Modifier = Modifier,
   navController: NavController,
+  vm: HomeViewModel = hiltViewModel(),
 ) {
+  var mounted by rememberSaveable { mutableStateOf(false) }
 
+  LaunchedEffect(Unit) {
+    if (!mounted) {
+      mounted = true
+      vm.add(HomeContract.Event.OnFetch)
+    }
+  }
+
+  val state by vm.state.collectAsStateWithLifecycle()
+  val effect = rememberFlowWithLifecycle(vm.effect)
+
+  LaunchedEffect(effect) {
+    effect.collect {
+      when (it) {
+        is HomeContract.Effect.NavigateToDetail -> {
+          navController.navigate(AppRoute.EventDetailPage(it.eventId))
+        }
+
+        is HomeContract.Effect.ShowToast -> {
+          Toast.makeText(
+            navController.context,
+            it.message,
+            Toast.LENGTH_SHORT
+          ).show()
+        }
+      }
+    }
+  }
+
+  PullToRefreshBox(
+    isRefreshing = state.isRefreshing,
+    onRefresh = { vm.add(HomeContract.Event.OnFetch) },
+    modifier = Modifier.fillMaxSize()
+  ) {
+    HomeScreenContent(
+      modifier = modifier,
+      upcomingEvents = state.upcomingEvents,
+      finishedEvents = state.finishedEvents,
+      isLoading = state.isFetching || state.isRefreshing,
+      hasError = state.error != null,
+      error = state.error,
+      onRetry = {
+        vm.add(HomeContract.Event.OnFetch)
+      },
+      onEventClick = {
+        vm.add(HomeContract.Event.OnEventClicked(it))
+      },
+      onFavoriteClick = {
+        vm.add(HomeContract.Event.OnEventFavoriteChanged(it))
+      },
+    )
+  }
 }
 
 @Composable
@@ -42,7 +110,7 @@ private fun HomeScreenContent(
   modifier: Modifier = Modifier,
   isLoading: Boolean,
   hasError: Boolean,
-  error: Throwable?,
+  error: String?,
   onRetry: () -> Unit,
   upcomingEvents: List<EventPreview>,
   finishedEvents: List<EventPreview>,
@@ -88,7 +156,7 @@ private fun HomeScreenContent(
       }
     }
 
-    if (hasError) ErrorFallback(message = error?.message, onRetry = onRetry)
+    if (hasError) ErrorFallback(message = error, onRetry = onRetry)
   }
 }
 

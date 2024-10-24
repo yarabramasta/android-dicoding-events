@@ -72,7 +72,7 @@ class EventsRepositoryImpl @Inject constructor(
 
   override suspend fun addFavEvent(event: EventPreview): Pair<EventPreview, AppError?> {
     try {
-      dao.insertFavoriteEvent(event.toEntity())
+      dao.insertFavoriteEvent(event.copy(isFavorite = true).toEntity())
       return Pair(event, null)
     } catch (e: Exception) {
       e.printStackTrace()
@@ -82,7 +82,7 @@ class EventsRepositoryImpl @Inject constructor(
 
   override suspend fun removeFavEvent(event: EventPreview): Pair<EventPreview, AppError?> {
     try {
-      dao.deleteFavoriteEvent(event.toEntity())
+      dao.deleteFavoriteEvent(event.copy(isFavorite = false).toEntity())
       return Pair(event, null)
     } catch (e: Exception) {
       e.printStackTrace()

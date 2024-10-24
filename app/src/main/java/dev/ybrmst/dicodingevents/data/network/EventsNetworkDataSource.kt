@@ -34,10 +34,7 @@ class EventsNetworkDataSource @Inject constructor(
       )
     ) { upcoming, finished ->
       if (upcoming.second != null || finished.second != null) {
-        ApiResponse.Failure.Error(
-          payload = upcoming.second ?: finished.second
-          ?: AppError.InternalServerError()
-        )
+        ApiResponse.Failure.Error(payload = upcoming.second ?: finished.second)
       } else {
         ApiResponse.Success(data = upcoming.first to finished.first)
       }
