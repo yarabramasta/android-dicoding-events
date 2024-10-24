@@ -22,7 +22,7 @@ fun MainNavigation() {
   ) {
     composable<AppRoute.MainPage> { backstackEntry ->
       val parentEntry = remember(backstackEntry) {
-        navController.getBackStackEntry(AppRoute.MainPage)!!
+        navController.getBackStackEntry(AppRoute.MainPage)
       }
       val homeVm = hiltViewModel<HomeViewModel>(parentEntry)
       MainScreen(navController, homeVm = homeVm)

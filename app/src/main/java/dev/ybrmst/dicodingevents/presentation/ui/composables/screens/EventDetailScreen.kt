@@ -34,7 +34,7 @@ fun EventDetailScreen(
           }
         },
         actions = {
-          IconButton(onClick = { /*TODO*/ }) {
+          IconButton(onClick = { }) {
             Icon(
               Icons.Outlined.StarOutline,
               contentDescription = "Favorite"
