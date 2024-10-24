@@ -22,6 +22,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -42,6 +45,7 @@ fun EventPreviewCard(
   Box(
     modifier = modifier
       .size(240.dp)
+      .shadow(2.dp, MaterialTheme.shapes.medium)
       .clip(MaterialTheme.shapes.medium)
       .clickable { onClick(event) }
   ) {
@@ -65,7 +69,15 @@ fun EventPreviewCard(
       verticalArrangement = Arrangement.Top,
       modifier = modifier
         .fillMaxSize()
-        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.6f))
+        .background(
+          shape = MaterialTheme.shapes.medium,
+          brush = Brush.verticalGradient(
+            listOf(
+              Color.Transparent,
+              MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f)
+            )
+          ),
+        )
         .zIndex(1f)
     ) {
       Box(modifier = Modifier.align(Alignment.End)) {
@@ -74,7 +86,7 @@ fun EventPreviewCard(
             if (isFavorite) Icons.Filled.Star
             else Icons.Outlined.StarOutline,
             contentDescription = "Favorite",
-            tint = MaterialTheme.colorScheme.onSurface
+            tint = MaterialTheme.colorScheme.tertiary
           )
         }
       }
@@ -87,7 +99,7 @@ fun EventPreviewCard(
       ) {
         Text(
           event.cityName,
-          color = MaterialTheme.colorScheme.onSurface,
+          color = MaterialTheme.colorScheme.onPrimaryContainer,
           maxLines = 1,
           overflow = TextOverflow.Ellipsis,
         )
@@ -95,7 +107,7 @@ fun EventPreviewCard(
         Text(
           event.name,
           style = MaterialTheme.typography.titleLarge,
-          color = MaterialTheme.colorScheme.onSurface,
+          color = MaterialTheme.colorScheme.onPrimaryContainer,
           fontWeight = FontWeight.Bold,
           maxLines = 2,
           overflow = TextOverflow.Ellipsis

@@ -1,7 +1,6 @@
 package dev.ybrmst.dicodingevents.data.local
 
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -17,6 +16,6 @@ interface FavoriteEventDao {
   @Insert(onConflict = OnConflictStrategy.REPLACE)
   fun insertFavoriteEvent(favoriteEventEntity: FavoriteEventEntity)
 
-  @Delete
-  fun deleteFavoriteEvent(favoriteEventEntity: FavoriteEventEntity)
+  @Query("DELETE FROM fav_events WHERE event_id = :eventId")
+  fun deleteFavoriteEvent(eventId: Int)
 }

@@ -8,12 +8,11 @@ import com.skydoves.sandwich.onSuccess
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.ybrmst.dicodingevents.domain.models.EventPreview
 import dev.ybrmst.dicodingevents.domain.repositories.EventsRepository
-import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -28,9 +27,9 @@ class HomeViewModel @Inject constructor(
   override val state: StateFlow<HomeContract.State>
     get() = mutableState.asStateFlow()
 
-  private val effectFlow = MutableSharedFlow<HomeContract.Effect>()
-  override val effect: SharedFlow<HomeContract.Effect>
-    get() = effectFlow.asSharedFlow()
+  private val effectFlow =
+    Channel<HomeContract.Effect>(capacity = Channel.CONFLATED)
+  override val effect = effectFlow.receiveAsFlow()
 
   override fun add(event: HomeContract.Event) {
     when (event) {
@@ -41,11 +40,9 @@ class HomeViewModel @Inject constructor(
     }
   }
 
-  private val upcomingEvents: List<EventPreview>
-    get() = mutableState.value.upcomingEvents
-
-  private val finishedEvents: List<EventPreview>
-    get() = mutableState.value.finishedEvents
+  init {
+    add(HomeContract.Event.OnFetch)
+  }
 
   private fun fetchEvents(isRefresh: Boolean) {
     viewModelScope.launch {
@@ -77,7 +74,7 @@ class HomeViewModel @Inject constructor(
   }
 
   private fun navigateToDetail(eventId: Int) {
-    effectFlow.tryEmit(HomeContract.Effect.NavigateToDetail(eventId))
+    effectFlow.trySend(HomeContract.Effect.NavigateToDetail(eventId))
   }
 
   private fun toggleFavorite(event: EventPreview) {
@@ -87,13 +84,26 @@ class HomeViewModel @Inject constructor(
         else repo.addFavEvent(event)
 
       if (error != null) {
-        effectFlow.tryEmit(
+        effectFlow.trySend(
           HomeContract.Effect.ShowToast("Failed to add event to favorites.")
         )
       } else {
         mutableState.value = mutableState.value.copy(
-          upcomingEvents = updateEventList(upcomingEvents, updatedEvent),
-          finishedEvents = updateEventList(finishedEvents, updatedEvent)
+          upcomingEvents = updateEventList(
+            mutableState.value.upcomingEvents,
+            updatedEvent
+          ),
+          finishedEvents = updateEventList(
+            mutableState.value.finishedEvents,
+            updatedEvent
+          )
+        )
+
+        effectFlow.trySend(
+          HomeContract.Effect.ShowToast(
+            if (updatedEvent.isFavorite) "Event added to favorites."
+            else "Event removed from favorites."
+          )
         )
       }
     }
@@ -104,45 +114,5 @@ class HomeViewModel @Inject constructor(
     updatedEvent: EventPreview,
   ): List<EventPreview> = events.map {
     if (it.id == updatedEvent.id) updatedEvent else it
-  }
-}
-
-interface HomeContract {
-  data class State(
-    val isFetching: Boolean,
-    val isRefreshing: Boolean,
-    val error: String? = null,
-    val upcomingEvents: List<EventPreview>,
-    val finishedEvents: List<EventPreview>,
-  ) {
-    companion object {
-      private val events = listOf(
-        EventPreview.fake(),
-        EventPreview.fake(),
-        EventPreview.fake(),
-        EventPreview.fake(),
-        EventPreview.fake(),
-      ).distinctBy { it.id }
-
-      fun initial() = State(
-        isFetching = false,
-        isRefreshing = false,
-        upcomingEvents = events.take(2),
-        finishedEvents = events.takeLast(3)
-      )
-    }
-  }
-
-  sealed class Event {
-    data object OnFetch : Event()
-    data object OnRefresh : Event()
-    data class OnEventClicked(val eventId: Int) : Event()
-    data class OnEventFavoriteChanged(val event: EventPreview) : Event()
-  }
-
-  sealed class Effect {
-    data class NavigateToDetail(val eventId: Int) : Effect()
-
-    data class ShowToast(val message: String) : Effect()
   }
 }

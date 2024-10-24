@@ -21,10 +21,9 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -50,29 +49,21 @@ fun HomeScreen(
   navController: NavController,
   vm: HomeViewModel = hiltViewModel(),
 ) {
-  var mounted by rememberSaveable { mutableStateOf(false) }
-
-  LaunchedEffect(Unit) {
-    if (!mounted) {
-      mounted = true
-      vm.add(HomeContract.Event.OnFetch)
-    }
-  }
-
   val state by vm.state.collectAsStateWithLifecycle()
   val effect = rememberFlowWithLifecycle(vm.effect)
+  val context = LocalContext.current
 
   LaunchedEffect(effect) {
-    effect.collect {
-      when (it) {
+    effect.collect { action ->
+      when (action) {
         is HomeContract.Effect.NavigateToDetail -> {
-          navController.navigate(AppRoute.EventDetailPage(it.eventId))
+          navController.navigate(AppRoute.EventDetailPage(action.eventId))
         }
 
         is HomeContract.Effect.ShowToast -> {
           Toast.makeText(
-            navController.context,
-            it.message,
+            context,
+            action.message,
             Toast.LENGTH_SHORT
           ).show()
         }
@@ -82,7 +73,7 @@ fun HomeScreen(
 
   PullToRefreshBox(
     isRefreshing = state.isRefreshing,
-    onRefresh = { vm.add(HomeContract.Event.OnFetch) },
+    onRefresh = { vm.add(HomeContract.Event.OnRefresh) },
     modifier = Modifier.fillMaxSize()
   ) {
     HomeScreenContent(
@@ -95,11 +86,11 @@ fun HomeScreen(
       onRetry = {
         vm.add(HomeContract.Event.OnFetch)
       },
-      onEventClick = {
-        vm.add(HomeContract.Event.OnEventClicked(it))
+      onEventClick = { eventId ->
+        vm.add(HomeContract.Event.OnEventClicked(eventId))
       },
-      onFavoriteClick = {
-        vm.add(HomeContract.Event.OnEventFavoriteChanged(it))
+      onFavoriteClick = { eventId ->
+        vm.add(HomeContract.Event.OnEventFavoriteChanged(eventId))
       },
     )
   }
@@ -162,10 +153,12 @@ private fun HomeScreenContent(
 
 private fun LazyListScope.buildHeadline() {
   item {
+    Spacer(modifier = Modifier.height(16.dp))
     Text(
       "Dicoding Events",
       style = MaterialTheme.typography.titleLarge,
       color = MaterialTheme.colorScheme.primary,
+      fontWeight = FontWeight.SemiBold,
       modifier = Modifier.padding(horizontal = 16.dp)
     )
     Spacer(modifier = Modifier.height(8.dp))
@@ -187,6 +180,7 @@ private fun LazyListScope.buildUpcomingEventsLayout(
     Text(
       "Upcoming Events",
       style = MaterialTheme.typography.titleMedium,
+      fontWeight = FontWeight.SemiBold,
       modifier = Modifier.padding(horizontal = 16.dp)
     )
     Spacer(modifier = Modifier.height(16.dp))
@@ -208,6 +202,7 @@ private fun LazyListScope.buildFinishedEventsLayout(
     Text(
       "Finished Events",
       style = MaterialTheme.typography.titleMedium,
+      fontWeight = FontWeight.SemiBold,
       modifier = Modifier.padding(horizontal = 16.dp)
     )
     Spacer(modifier = Modifier.height(16.dp))

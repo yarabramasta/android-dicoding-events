@@ -10,7 +10,7 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Explore
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material.icons.outlined.Star
+import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -19,19 +19,25 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import dev.ybrmst.dicodingevents.presentation.ui.composables.atoms.BottomNavItem
 import dev.ybrmst.dicodingevents.presentation.ui.composables.atoms.MainScreenBottomNavBar
 import dev.ybrmst.dicodingevents.presentation.ui.composables.atoms.Placeholder
 import dev.ybrmst.dicodingevents.presentation.ui.theme.AppTheme
+import dev.ybrmst.dicodingevents.presentation.viewmodel.HomeViewModel
 
 @Composable
-fun MainScreen(navController: NavController) {
+fun MainScreen(
+  navController: NavController,
+  homeVm: HomeViewModel = hiltViewModel(),
+) {
   MainScreenContent { activeScreen, innerPadding ->
     when (activeScreen) {
       "Home" -> HomeScreen(
         navController = navController,
-        modifier = Modifier.padding(innerPadding)
+        modifier = Modifier.padding(innerPadding),
+        vm = homeVm,
       )
 
       "Discover" -> Placeholder(
@@ -70,7 +76,7 @@ private fun MainScreenContent(
     BottomNavItem(
       label = "Favorites",
       selectedIcon = Icons.Filled.Star,
-      icon = Icons.Outlined.Star
+      icon = Icons.Outlined.StarOutline
     ),
     BottomNavItem(
       label = "Settings",

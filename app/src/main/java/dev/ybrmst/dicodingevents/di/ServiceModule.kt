@@ -1,6 +1,9 @@
 package dev.ybrmst.dicodingevents.di
 
 import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStore
 import androidx.room.Room
 import com.skydoves.sandwich.retrofit.adapters.ApiResponseCallAdapterFactory
 import dagger.Module
@@ -10,9 +13,9 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import dev.ybrmst.dicodingevents.data.local.EventsDatabase
 import dev.ybrmst.dicodingevents.data.local.FavoriteEventDao
-import dev.ybrmst.dicodingevents.data.local.PreferenceService
 import dev.ybrmst.dicodingevents.data.network.DicodingEventsApiService
 import dev.ybrmst.dicodingevents.data.network.EventsNetworkDataSource
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -21,7 +24,8 @@ import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
-import kotlin.coroutines.CoroutineContext
+
+val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -29,15 +33,16 @@ object ServiceModule {
 
   @Provides
   @Singleton
-  fun providePreferenceService(
+  fun provideDataStore(
     @ApplicationContext context: Context,
-  ): PreferenceService = PreferenceService(context)
+  ): DataStore<Preferences> = context.dataStore
 
   private val loggingInterceptor = HttpLoggingInterceptor().apply {
     level = HttpLoggingInterceptor.Level.BODY
   }
 
   @Provides
+  @Singleton
   fun provideOkHttp() = OkHttpClient
     .Builder()
     .addInterceptor(loggingInterceptor)
@@ -45,6 +50,7 @@ object ServiceModule {
     .build()
 
   @Provides
+  @Singleton
   fun provideRetrofit(okHttp: OkHttpClient): Retrofit =
     Retrofit
       .Builder()
@@ -62,9 +68,10 @@ object ServiceModule {
     retrofit.create(DicodingEventsApiService::class.java)
 
   @Provides
+  @Singleton
   fun provideEventsNetworkDataSource(
     api: DicodingEventsApiService,
-    @IoDispatcher ioDispatcher: CoroutineContext,
+    @IoDispatcher ioDispatcher: CoroutineDispatcher,
   ): EventsNetworkDataSource = EventsNetworkDataSource(api, ioDispatcher)
 
   @Provides

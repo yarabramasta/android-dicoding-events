@@ -12,19 +12,20 @@ import dev.ybrmst.dicodingevents.domain.models.EventDetail
 import dev.ybrmst.dicodingevents.domain.models.EventPreview
 import dev.ybrmst.dicodingevents.domain.models.toEntity
 import dev.ybrmst.dicodingevents.domain.repositories.EventsRepository
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.coroutines.CoroutineContext
 
 @Singleton
 class EventsRepositoryImpl @Inject constructor(
   private val api: EventsNetworkDataSource,
   private val dao: FavoriteEventDao,
-  @IoDispatcher private val ioDispatcher: CoroutineContext,
+  @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : EventsRepository {
   override fun getUpcomingFinishedEvents(): Flow<ApiResponse<Pair<List<EventPreview>, List<EventPreview>>>> {
     return api.getUpcomingFinishedEvents().map {
@@ -38,7 +39,7 @@ class EventsRepositoryImpl @Inject constructor(
           second.map { event -> event.copy(isFavorite = favEvents.contains(event.id)) }
         )
       }
-    }
+    }.flowOn(ioDispatcher)
   }
 
   override fun queryEvents(
@@ -55,7 +56,7 @@ class EventsRepositoryImpl @Inject constructor(
           event.copy(isFavorite = favEvents.contains(event.id))
         }
       }
-    }
+    }.flowOn(ioDispatcher)
   }
 
   override fun getFavEvents(): Flow<Pair<List<EventPreview>, AppError?>> {
@@ -71,22 +72,26 @@ class EventsRepositoryImpl @Inject constructor(
   }
 
   override suspend fun addFavEvent(event: EventPreview): Pair<EventPreview, AppError?> {
-    try {
-      dao.insertFavoriteEvent(event.copy(isFavorite = true).toEntity())
-      return Pair(event, null)
-    } catch (e: Exception) {
-      e.printStackTrace()
-      return Pair(event, AppError.InternalServerError())
+    return withContext(ioDispatcher) {
+      try {
+        dao.insertFavoriteEvent(event.toEntity())
+        Pair(event.copy(isFavorite = true), null)
+      } catch (e: Exception) {
+        e.printStackTrace()
+        Pair(event, AppError.InternalServerError())
+      }
     }
   }
 
   override suspend fun removeFavEvent(event: EventPreview): Pair<EventPreview, AppError?> {
-    try {
-      dao.deleteFavoriteEvent(event.copy(isFavorite = false).toEntity())
-      return Pair(event, null)
-    } catch (e: Exception) {
-      e.printStackTrace()
-      return Pair(event, AppError.InternalServerError())
+    return withContext(ioDispatcher) {
+      try {
+        dao.deleteFavoriteEvent(event.id)
+        Pair(event.copy(isFavorite = false), null)
+      } catch (e: Exception) {
+        e.printStackTrace()
+        Pair(event, AppError.InternalServerError())
+      }
     }
   }
 

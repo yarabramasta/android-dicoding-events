@@ -11,6 +11,7 @@ import dev.ybrmst.dicodingevents.domain.models.AppError
 import dev.ybrmst.dicodingevents.domain.models.EventDetail
 import dev.ybrmst.dicodingevents.domain.models.EventPreview
 import dev.ybrmst.dicodingevents.domain.models.toPreview
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
@@ -18,13 +19,10 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import retrofit2.Response
 import javax.inject.Inject
-import javax.inject.Singleton
-import kotlin.coroutines.CoroutineContext
 
-@Singleton
 class EventsNetworkDataSource @Inject constructor(
   private val api: DicodingEventsApiService,
-  @IoDispatcher private val ioDispatcher: CoroutineContext,
+  @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) {
   fun getUpcomingFinishedEvents(): Flow<ApiResponse<Pair<List<EventPreview>, List<EventPreview>>>> {
     return getEvents(active = 1, limit = 5).combine(
