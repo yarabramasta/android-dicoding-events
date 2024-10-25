@@ -30,13 +30,10 @@ fun EmptyItemsFallback(
   modifier: Modifier = Modifier,
   onRefresh: () -> Unit,
   message: String? = null,
-  vm: SettingsViewModel = hiltViewModel(),
 ) {
-  val themeState by vm.state.collectAsState()
-
   EmptyItemsFallbackContent(
     modifier = modifier,
-    isDarkTheme = themeState.isDarkTheme,
+    isDarkTheme = false,
     message = message,
     onRefresh = onRefresh
   )

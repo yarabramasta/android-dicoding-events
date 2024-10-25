@@ -25,8 +25,6 @@ import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
-val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
-
 @Module
 @InstallIn(SingletonComponent::class)
 object ServiceModule {

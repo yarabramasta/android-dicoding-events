@@ -31,13 +31,10 @@ fun ErrorFallback(
   modifier: Modifier = Modifier,
   message: String? = null,
   onRetry: () -> Unit,
-  vm: SettingsViewModel = hiltViewModel(),
 ) {
-  val themeState by vm.state.collectAsState()
-
   ErrorFallbackContent(
     modifier = modifier,
-    isDarkTheme = themeState.isDarkTheme,
+    isDarkTheme = false,
     message = message,
     onRetry = onRetry
   )
