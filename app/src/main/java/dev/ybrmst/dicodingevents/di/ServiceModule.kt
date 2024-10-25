@@ -31,12 +31,6 @@ val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "se
 @InstallIn(SingletonComponent::class)
 object ServiceModule {
 
-  @Provides
-  @Singleton
-  fun provideDataStore(
-    @ApplicationContext context: Context,
-  ): DataStore<Preferences> = context.dataStore
-
   private val loggingInterceptor = HttpLoggingInterceptor().apply {
     level = HttpLoggingInterceptor.Level.BODY
   }

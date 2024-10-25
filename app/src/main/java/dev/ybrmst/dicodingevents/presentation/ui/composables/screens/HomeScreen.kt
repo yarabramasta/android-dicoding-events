@@ -47,8 +47,8 @@ import dev.ybrmst.dicodingevents.presentation.viewmodel.HomeViewModel
 fun HomeScreen(
   modifier: Modifier = Modifier,
   navController: NavController,
-  vm: HomeViewModel = hiltViewModel(),
 ) {
+  val vm: HomeViewModel = hiltViewModel()
   val state by vm.state.collectAsStateWithLifecycle()
   val effect = rememberFlowWithLifecycle(vm.effect)
   val context = LocalContext.current
@@ -156,7 +156,7 @@ private fun LazyListScope.buildHeadline() {
     Spacer(modifier = Modifier.height(16.dp))
     Text(
       "Dicoding Events",
-      style = MaterialTheme.typography.titleLarge,
+      style = MaterialTheme.typography.headlineMedium,
       color = MaterialTheme.colorScheme.primary,
       fontWeight = FontWeight.SemiBold,
       modifier = Modifier.padding(horizontal = 16.dp)
@@ -179,7 +179,7 @@ private fun LazyListScope.buildUpcomingEventsLayout(
   item {
     Text(
       "Upcoming Events",
-      style = MaterialTheme.typography.titleMedium,
+      style = MaterialTheme.typography.titleLarge,
       fontWeight = FontWeight.SemiBold,
       modifier = Modifier.padding(horizontal = 16.dp)
     )
@@ -201,7 +201,7 @@ private fun LazyListScope.buildFinishedEventsLayout(
   item {
     Text(
       "Finished Events",
-      style = MaterialTheme.typography.titleMedium,
+      style = MaterialTheme.typography.titleLarge,
       fontWeight = FontWeight.SemiBold,
       modifier = Modifier.padding(horizontal = 16.dp)
     )

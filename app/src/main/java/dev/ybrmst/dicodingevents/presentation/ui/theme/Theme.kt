@@ -1,10 +1,16 @@
 package dev.ybrmst.dicodingevents.presentation.ui.theme
 
+import android.graphics.Color
+import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.ui.platform.LocalContext
 
 private val lightScheme = lightColorScheme(
   primary = primaryLight,
@@ -90,6 +96,22 @@ fun AppTheme(
   val colorScheme = when {
     darkTheme -> darkScheme
     else -> lightScheme
+  }
+
+  val context = LocalContext.current as ComponentActivity
+
+  DisposableEffect(darkTheme) {
+    context.enableEdgeToEdge(
+      statusBarStyle =
+      if (!darkTheme) {
+        SystemBarStyle.light(
+          Color.TRANSPARENT,
+          Color.TRANSPARENT
+        )
+      } else SystemBarStyle.dark(Color.TRANSPARENT),
+    )
+
+    onDispose {}
   }
 
   MaterialTheme(

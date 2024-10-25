@@ -19,25 +19,24 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import dev.ybrmst.dicodingevents.presentation.ui.composables.atoms.BottomNavItem
 import dev.ybrmst.dicodingevents.presentation.ui.composables.atoms.MainScreenBottomNavBar
 import dev.ybrmst.dicodingevents.presentation.ui.composables.atoms.Placeholder
 import dev.ybrmst.dicodingevents.presentation.ui.theme.AppTheme
-import dev.ybrmst.dicodingevents.presentation.viewmodel.HomeViewModel
 
 @Composable
 fun MainScreen(
+  modifier: Modifier = Modifier,
   navController: NavController,
-  homeVm: HomeViewModel = hiltViewModel(),
 ) {
-  MainScreenContent { activeScreen, innerPadding ->
+  MainScreenContent(
+    modifier = modifier
+  ) { activeScreen, innerPadding ->
     when (activeScreen) {
       "Home" -> HomeScreen(
-        navController = navController,
         modifier = Modifier.padding(innerPadding),
-        vm = homeVm,
+        navController = navController,
       )
 
       "Discover" -> Placeholder(
@@ -48,8 +47,8 @@ fun MainScreen(
         modifier = Modifier.padding(innerPadding)
       )
 
-      "Settings" -> Placeholder(
-        modifier = Modifier.padding(innerPadding)
+      "Settings" -> SettingsScreen(
+        modifier = Modifier.padding(innerPadding),
       )
     }
   }
@@ -57,6 +56,7 @@ fun MainScreen(
 
 @Composable
 private fun MainScreenContent(
+  modifier: Modifier = Modifier,
   content: @Composable (
     activeScreen: String,
     paddingValues: PaddingValues,
@@ -88,6 +88,7 @@ private fun MainScreenContent(
   var currentActiveIndex by rememberSaveable { mutableIntStateOf(0) }
 
   Scaffold(
+    modifier = modifier,
     bottomBar = {
       MainScreenBottomNavBar(
         items = bottomNavItems,

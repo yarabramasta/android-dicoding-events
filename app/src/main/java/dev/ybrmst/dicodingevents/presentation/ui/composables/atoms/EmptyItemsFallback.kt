@@ -24,14 +24,13 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import dev.ybrmst.dicodingevents.R
 import dev.ybrmst.dicodingevents.presentation.ui.theme.AppTheme
-import dev.ybrmst.dicodingevents.presentation.viewmodel.ThemeViewModel
 
 @Composable
 fun EmptyItemsFallback(
   modifier: Modifier = Modifier,
   onRefresh: () -> Unit,
   message: String? = null,
-  vm: ThemeViewModel = hiltViewModel(),
+  vm: SettingsViewModel = hiltViewModel(),
 ) {
   val themeState by vm.state.collectAsState()
 
