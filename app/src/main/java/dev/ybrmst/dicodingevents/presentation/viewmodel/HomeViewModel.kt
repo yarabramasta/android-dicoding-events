@@ -1,6 +1,5 @@
 package dev.ybrmst.dicodingevents.presentation.viewmodel
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.skydoves.sandwich.messageOrNull
 import com.skydoves.sandwich.onFailure
@@ -8,28 +7,18 @@ import com.skydoves.sandwich.onSuccess
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.ybrmst.dicodingevents.domain.models.EventPreview
 import dev.ybrmst.dicodingevents.domain.repositories.EventsRepository
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.receiveAsFlow
+import dev.ybrmst.dicodingevents.lib.BaseViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
   private val repo: EventsRepository,
-) :
-  ViewModel(),
-  UnidirectionalViewModel<HomeContract.State, HomeContract.Event, HomeContract.Effect> {
-
-  private val mutableState = MutableStateFlow(HomeContract.State.initial())
-  override val state: StateFlow<HomeContract.State>
-    get() = mutableState.asStateFlow()
-
-  private val effectFlow =
-    Channel<HomeContract.Effect>(capacity = Channel.CONFLATED)
-  override val effect = effectFlow.receiveAsFlow()
+) : BaseViewModel<
+        HomeContract.State,
+        HomeContract.Event,
+        HomeContract.Effect>
+  (initialState = HomeContract.State.initial()) {
 
   override fun add(event: HomeContract.Event) {
     when (event) {
@@ -46,35 +35,41 @@ class HomeViewModel @Inject constructor(
 
   private fun fetchEvents(isRefresh: Boolean) {
     viewModelScope.launch {
-      mutableState.value = mutableState.value.copy(
-        isFetching = !isRefresh,
-        isRefreshing = isRefresh
-      )
+      setState {
+        copy(
+          isFetching = !isRefresh,
+          isRefreshing = isRefresh
+        )
+      }
 
       repo.getUpcomingFinishedEvents().collect {
         it
           .onSuccess {
-            mutableState.value = mutableState.value.copy(
-              isFetching = false,
-              isRefreshing = false,
-              upcomingEvents = data.first,
-              finishedEvents = data.second
-            )
+            setState {
+              copy(
+                isFetching = false,
+                isRefreshing = false,
+                upcomingEvents = data.first,
+                finishedEvents = data.second
+              )
+            }
           }
           .onFailure {
-            mutableState.value = mutableState.value.copy(
-              isFetching = false,
-              isRefreshing = false,
-              error = this.messageOrNull
-                ?: "Uh oh! Unexpected error occurred.\nPlease try again."
-            )
+            setState {
+              copy(
+                isFetching = false,
+                isRefreshing = false,
+                error = messageOrNull
+                  ?: "Uh oh! Unexpected error occurred.\nPlease try again."
+              )
+            }
           }
       }
     }
   }
 
   private fun navigateToDetail(eventId: Int) {
-    effectFlow.trySend(HomeContract.Effect.NavigateToDetail(eventId))
+    sendEffect(HomeContract.Effect.NavigateToDetail(eventId))
   }
 
   private fun toggleFavorite(event: EventPreview) {
@@ -84,22 +79,16 @@ class HomeViewModel @Inject constructor(
         else repo.addFavEvent(event)
 
       if (error != null) {
-        effectFlow.trySend(
-          HomeContract.Effect.ShowToast("Failed to add event to favorites.")
-        )
+        sendEffect(HomeContract.Effect.ShowToast("Failed to add event to favorites."))
       } else {
-        mutableState.value = mutableState.value.copy(
-          upcomingEvents = updateEventList(
-            mutableState.value.upcomingEvents,
-            updatedEvent
-          ),
-          finishedEvents = updateEventList(
-            mutableState.value.finishedEvents,
-            updatedEvent
+        setState {
+          copy(
+            upcomingEvents = updateEventList(upcomingEvents, updatedEvent),
+            finishedEvents = updateEventList(finishedEvents, updatedEvent)
           )
-        )
+        }
 
-        effectFlow.trySend(
+        sendEffect(
           HomeContract.Effect.ShowToast(
             if (updatedEvent.isFavorite) "Event added to favorites."
             else "Event removed from favorites."

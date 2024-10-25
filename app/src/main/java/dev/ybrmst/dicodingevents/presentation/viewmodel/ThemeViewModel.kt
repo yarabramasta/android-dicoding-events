@@ -1,36 +1,26 @@
 package dev.ybrmst.dicodingevents.presentation.viewmodel
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.ybrmst.dicodingevents.data.repositories.PreferenceRepositoryImpl
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
+import dev.ybrmst.dicodingevents.lib.BaseViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class ThemeViewModel @Inject constructor(
   private val repo: PreferenceRepositoryImpl,
-) : ViewModel(),
-  UnidirectionalViewModel<ThemeContract.State, ThemeContract.Event, ThemeContract.Effect> {
-
-  private val mutableState = MutableStateFlow(ThemeContract.State.initial())
-  override val state: StateFlow<ThemeContract.State>
-    get() = mutableState.asStateFlow()
-
-  private val effectFlow = MutableSharedFlow<ThemeContract.Effect>()
-  override val effect: SharedFlow<ThemeContract.Effect>
-    get() = effectFlow.asSharedFlow()
+) :
+  BaseViewModel<
+          ThemeContract.State,
+          ThemeContract.Event,
+          ThemeContract.Effect>
+    (initialState = ThemeContract.State.initial()) {
 
   init {
     viewModelScope.launch {
       val isDarkMode = repo.getDarkMode()
-      mutableState.value = mutableState.value.copy(isDarkTheme = isDarkMode)
+      setState { copy(isDarkTheme = isDarkMode) }
     }
   }
 
@@ -42,9 +32,10 @@ class ThemeViewModel @Inject constructor(
 
   private fun toggleDarkMode() {
     viewModelScope.launch {
-      val isDarkMode = mutableState.value.isDarkTheme
+      val isDarkMode = state.value.isDarkTheme
       repo.setDarkMode(!isDarkMode)
-      mutableState.value = mutableState.value.copy(isDarkTheme = !isDarkMode)
+
+      setState { copy(isDarkTheme = !isDarkMode) }
     }
   }
 }

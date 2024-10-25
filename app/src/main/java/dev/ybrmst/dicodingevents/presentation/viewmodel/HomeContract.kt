@@ -2,8 +2,9 @@ package dev.ybrmst.dicodingevents.presentation.viewmodel
 
 import androidx.compose.runtime.Immutable
 import dev.ybrmst.dicodingevents.domain.models.EventPreview
+import dev.ybrmst.dicodingevents.lib.ViewModelContract
 
-interface HomeContract {
+interface HomeContract : ViewModelContract {
   @Immutable
   data class State(
     val isFetching: Boolean,
@@ -11,7 +12,7 @@ interface HomeContract {
     val error: String? = null,
     val upcomingEvents: List<EventPreview>,
     val finishedEvents: List<EventPreview>,
-  ) {
+  ) : ViewModelContract.State {
     companion object {
       private val events = listOf(
         EventPreview.fake(),
@@ -30,14 +31,14 @@ interface HomeContract {
     }
   }
 
-  sealed class Event {
+  sealed class Event : ViewModelContract.Event {
     data object OnFetch : Event()
     data object OnRefresh : Event()
     data class OnEventClicked(val eventId: Int) : Event()
     data class OnEventFavoriteChanged(val event: EventPreview) : Event()
   }
 
-  sealed class Effect {
+  sealed class Effect : ViewModelContract.Effect {
     data class NavigateToDetail(val eventId: Int) : Effect()
     data class ShowToast(val message: String) : Effect()
   }
