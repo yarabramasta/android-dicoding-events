@@ -26,7 +26,8 @@ class PreferencesDataSource @Inject constructor(
     const val SETTINGS_DATASTORE_NAME = "_dicoding_events_app_settings"
 
     val THEME_MODE_PREFERENCES_KEY_NAME = intPreferencesKey("_app_theme_mode")
-    val DAILY_NOTIF_PREFERENCES_KEY_NAME = booleanPreferencesKey("_app_daily_notif")
+    val DAILY_NOTIF_PREFERENCES_KEY_NAME =
+      booleanPreferencesKey("_app_daily_notif")
   }
 
   private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
@@ -34,17 +35,17 @@ class PreferencesDataSource @Inject constructor(
   )
 
   val themeFlow: Flow<ThemeMode>
-    get()= context
-    .dataStore
-    .data
-    .map { it[THEME_MODE_PREFERENCES_KEY_NAME] ?: 0 }
-    .map { ThemeMode.values()[it] }
+    get() = context
+      .dataStore
+      .data
+      .map { it[THEME_MODE_PREFERENCES_KEY_NAME] ?: 0 }
+      .map { ThemeMode.entries[it] }
 
   val dailyNotifOptInFlow: Flow<Boolean>
     get() = context
-    .dataStore
-    .data
-    .map { it[DAILY_NOTIF_PREFERENCES_KEY_NAME] ?: false }
+      .dataStore
+      .data
+      .map { it[DAILY_NOTIF_PREFERENCES_KEY_NAME] ?: false }
 
   suspend fun setThemeMode(themeMode: ThemeMode) {
     context.dataStore.edit { settings ->
