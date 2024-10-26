@@ -13,14 +13,19 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import dev.ybrmst.dicodingevents.R
+import dev.ybrmst.dicodingevents.presentation.ui.composables.isDarkThemeEnabled
 import dev.ybrmst.dicodingevents.presentation.ui.theme.AppTheme
+import dev.ybrmst.dicodingevents.presentation.viewmodel.SettingsViewModel
 
 @Composable
 fun EmptyItemsFallback(
@@ -28,9 +33,12 @@ fun EmptyItemsFallback(
   onRefresh: () -> Unit,
   message: String? = null,
 ) {
+  val vm = hiltViewModel<SettingsViewModel>()
+  val settings by vm.state.collectAsState()
+
   EmptyItemsFallbackContent(
     modifier = modifier,
-    isDarkTheme = false,
+    isDarkTheme = isDarkThemeEnabled(settings.themeMode),
     message = message,
     onRefresh = onRefresh
   )

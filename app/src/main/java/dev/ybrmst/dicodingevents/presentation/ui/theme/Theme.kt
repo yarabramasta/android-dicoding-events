@@ -1,16 +1,15 @@
 package dev.ybrmst.dicodingevents.presentation.ui.theme
 
-import android.graphics.Color
-import androidx.activity.ComponentActivity
-import androidx.activity.SystemBarStyle
-import androidx.activity.enableEdgeToEdge
+import android.app.Activity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
 
 private val lightScheme = lightColorScheme(
   primary = primaryLight,
@@ -98,20 +97,16 @@ fun AppTheme(
     else -> lightScheme
   }
 
-  val context = LocalContext.current as ComponentActivity
-
-  DisposableEffect(darkTheme) {
-    context.enableEdgeToEdge(
-      statusBarStyle =
-      if (!darkTheme) {
-        SystemBarStyle.light(
-          Color.TRANSPARENT,
-          Color.TRANSPARENT
-        )
-      } else SystemBarStyle.dark(Color.TRANSPARENT),
-    )
-
-    onDispose {}
+  val view = LocalView.current
+  if (!view.isInEditMode) {
+    SideEffect {
+      val window = (view.context as Activity).window
+      window.statusBarColor = colorScheme.surface.toArgb()
+      WindowCompat.getInsetsController(
+        window,
+        view
+      ).isAppearanceLightStatusBars = !darkTheme
+    }
   }
 
   MaterialTheme(

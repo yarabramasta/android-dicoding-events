@@ -32,7 +32,9 @@ class EventsNetworkDataSource @Inject constructor(
       )
     ) { upcoming, finished ->
       if (upcoming.second != null || finished.second != null) {
-        ApiResponse.Failure.Error(payload = upcoming.second ?: finished.second)
+        ApiResponse.Failure.Error(
+          payload = upcoming.second?.message ?: finished.second?.message
+        )
       } else {
         ApiResponse.Success(data = upcoming.first to finished.first)
       }
@@ -45,7 +47,7 @@ class EventsNetworkDataSource @Inject constructor(
   ): Flow<ApiResponse<List<EventPreview>>> {
     return getEvents(query = query, active = active).map {
       if (it.second != null) {
-        ApiResponse.Failure.Error(payload = it.second)
+        ApiResponse.Failure.Error(payload = it.second?.message)
       } else {
         ApiResponse.Success(data = it.first)
       }

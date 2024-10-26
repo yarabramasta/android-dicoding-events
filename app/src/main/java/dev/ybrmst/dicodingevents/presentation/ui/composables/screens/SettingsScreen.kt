@@ -17,21 +17,38 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import dev.ybrmst.dicodingevents.presentation.ui.composables.isDarkThemeEnabled
 import dev.ybrmst.dicodingevents.presentation.ui.theme.AppTheme
+import dev.ybrmst.dicodingevents.presentation.viewmodel.SettingsContract
+import dev.ybrmst.dicodingevents.presentation.viewmodel.SettingsViewModel
 
 @Composable
 fun SettingsScreen(modifier: Modifier = Modifier) {
+  val vm = hiltViewModel<SettingsViewModel>()
+  val settings by vm.state.collectAsState()
+  val isDarkMode = isDarkThemeEnabled(settings.themeMode)
+
   SettingsScreenContent(
     modifier = modifier,
-    isDarkMode = false,
-    onDarkModeChanged = {},
-    isOptInDailyNotif = false,
-    onDailyNotifChanged = {}
+    isDarkMode = isDarkMode,
+    onChangeDarkMode = {
+      vm.add(SettingsContract.Event.OnSetThemeMode(it))
+    },
+    isOptInDailyNotif = settings.isOptInDailyNotif,
+    onToggleOptInDailyNotif = {
+      vm.add(SettingsContract.Event.OnToggleDailyNotifOptIn)
+    }
   )
 }
 
@@ -39,10 +56,13 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
 fun SettingsScreenContent(
   modifier: Modifier = Modifier,
   isDarkMode: Boolean,
-  onDarkModeChanged: (Boolean) -> Unit,
+  onChangeDarkMode: (Boolean) -> Unit,
   isOptInDailyNotif: Boolean,
-  onDailyNotifChanged: (Boolean) -> Unit,
+  onToggleOptInDailyNotif: () -> Unit,
 ) {
+  var darkMode by remember { mutableStateOf(isDarkMode) }
+  var dailyNotifOptIn by remember { mutableStateOf(isOptInDailyNotif) }
+
   LazyColumn(modifier = modifier.fillMaxSize()) {
     item {
       Spacer(modifier = Modifier.height(16.dp))
@@ -64,7 +84,7 @@ fun SettingsScreenContent(
       ListItem(
         leadingContent = {
           Icon(
-            if (isDarkMode) Icons.Outlined.DarkMode
+            if (darkMode) Icons.Outlined.DarkMode
             else Icons.Outlined.LightMode,
             contentDescription = null
           )
@@ -85,15 +105,18 @@ fun SettingsScreenContent(
         },
         trailingContent = {
           Switch(
-            checked = isDarkMode,
-            onCheckedChange = onDarkModeChanged
+            checked = darkMode,
+            onCheckedChange = {
+              onChangeDarkMode(it)
+              darkMode = it
+            }
           )
         }
       )
       ListItem(
         leadingContent = {
           Icon(
-            if (isOptInDailyNotif) Icons.Outlined.NotificationsActive
+            if (dailyNotifOptIn) Icons.Outlined.NotificationsActive
             else Icons.Outlined.Notifications,
             contentDescription = null
           )
@@ -114,8 +137,11 @@ fun SettingsScreenContent(
         },
         trailingContent = {
           Switch(
-            checked = isOptInDailyNotif,
-            onCheckedChange = onDailyNotifChanged
+            checked = dailyNotifOptIn,
+            onCheckedChange = {
+              onToggleOptInDailyNotif()
+              dailyNotifOptIn = it
+            }
           )
         }
       )
@@ -132,9 +158,9 @@ private fun PreviewSettingsScreen() {
       SettingsScreenContent(
         modifier = Modifier.padding(innerPadding),
         isDarkMode = true,
-        onDarkModeChanged = {},
+        onChangeDarkMode = {},
         isOptInDailyNotif = false,
-        onDailyNotifChanged = {}
+        onToggleOptInDailyNotif = {}
       )
     }
   }

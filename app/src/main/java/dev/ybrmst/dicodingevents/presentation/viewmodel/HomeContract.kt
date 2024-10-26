@@ -4,7 +4,7 @@ import androidx.compose.runtime.Immutable
 import dev.ybrmst.dicodingevents.domain.models.EventPreview
 import dev.ybrmst.dicodingevents.lib.ViewModelContract
 
-interface HomeContract : ViewModelContract {
+class HomeContract : ViewModelContract {
   @Immutable
   data class State(
     val isFetching: Boolean,

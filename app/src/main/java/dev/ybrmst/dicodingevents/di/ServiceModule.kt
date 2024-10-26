@@ -10,6 +10,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import dev.ybrmst.dicodingevents.data.local.EventsDatabase
 import dev.ybrmst.dicodingevents.data.local.FavoriteEventDao
+import dev.ybrmst.dicodingevents.data.local.PreferencesDataSource
 import dev.ybrmst.dicodingevents.data.network.DicodingEventsApiService
 import dev.ybrmst.dicodingevents.data.network.EventsNetworkDataSource
 import kotlinx.coroutines.CoroutineDispatcher
@@ -78,4 +79,10 @@ object ServiceModule {
   fun provideFavoriteEventDao(appDatabase: EventsDatabase): FavoriteEventDao {
     return appDatabase.favEventDao()
   }
+
+  @Provides
+  @Singleton
+  fun providePreferencesDataSource(
+    @ApplicationContext context: Context,
+  ) = PreferencesDataSource(context)
 }
