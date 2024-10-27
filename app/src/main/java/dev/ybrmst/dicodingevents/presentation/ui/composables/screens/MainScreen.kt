@@ -1,6 +1,7 @@
 package dev.ybrmst.dicodingevents.presentation.ui.composables.screens
 
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Explore
@@ -19,36 +20,55 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import dev.ybrmst.dicodingevents.presentation.ui.composables.atoms.BottomNavItem
 import dev.ybrmst.dicodingevents.presentation.ui.composables.atoms.MainScreenBottomNavBar
 import dev.ybrmst.dicodingevents.presentation.ui.composables.atoms.Placeholder
 import dev.ybrmst.dicodingevents.presentation.ui.theme.AppTheme
+import dev.ybrmst.dicodingevents.presentation.viewmodel.FavoritesContract
+import dev.ybrmst.dicodingevents.presentation.viewmodel.FavoritesViewModel
+import dev.ybrmst.dicodingevents.presentation.viewmodel.HomeContract
+import dev.ybrmst.dicodingevents.presentation.viewmodel.HomeViewModel
+import dev.ybrmst.dicodingevents.presentation.viewmodel.SettingsViewModel
 
 @Composable
 fun MainScreen(
   modifier: Modifier = Modifier,
   navController: NavController,
+  homeVm: HomeViewModel = hiltViewModel(),
+  favsVm: FavoritesViewModel = hiltViewModel(),
+  settingsVm: SettingsViewModel = hiltViewModel(),
 ) {
   MainScreenContent(
-    modifier = modifier
+    modifier = modifier.fillMaxSize(),
+    onItemSelected = { index ->
+      when (index) {
+        0 -> homeVm.add(HomeContract.Event.OnScreenChanged)
+        2 -> favsVm.add(FavoritesContract.Event.OnScreenChanged)
+      }
+    }
   ) { activeScreen, innerPadding ->
     when (activeScreen) {
       "Home" -> HomeScreen(
         modifier = Modifier.padding(innerPadding),
         navController = navController,
+        vm = homeVm,
       )
 
       "Discover" -> Placeholder(
         modifier = Modifier.padding(innerPadding)
       )
 
-      "Favorites" -> Placeholder(
-        modifier = Modifier.padding(innerPadding)
+      "Favorites" -> FavoritesScreen(
+        modifier = Modifier.padding(innerPadding),
+        navController = navController,
+        vm = favsVm,
       )
 
       "Settings" -> SettingsScreen(
         modifier = Modifier.padding(innerPadding),
+        vm = settingsVm,
       )
     }
   }
@@ -57,6 +77,7 @@ fun MainScreen(
 @Composable
 private fun MainScreenContent(
   modifier: Modifier = Modifier,
+  onItemSelected: (Int) -> Unit = {},
   content: @Composable (
     activeScreen: String,
     paddingValues: PaddingValues,
@@ -93,7 +114,10 @@ private fun MainScreenContent(
       MainScreenBottomNavBar(
         items = bottomNavItems,
         selectedItemIndex = currentActiveIndex,
-        onItemSelected = { index -> currentActiveIndex = index }
+        onItemSelected = { index ->
+          currentActiveIndex = index
+          onItemSelected(index)
+        }
       )
     }
   ) { innerPadding ->

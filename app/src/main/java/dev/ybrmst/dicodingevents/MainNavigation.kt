@@ -8,12 +8,17 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import dev.ybrmst.dicodingevents.presentation.ui.composables.screens.EventDetailScreen
 import dev.ybrmst.dicodingevents.presentation.ui.composables.screens.MainScreen
+import dev.ybrmst.dicodingevents.presentation.viewmodel.FavoritesViewModel
+import dev.ybrmst.dicodingevents.presentation.viewmodel.HomeViewModel
+import dev.ybrmst.dicodingevents.presentation.viewmodel.SettingsViewModel
 import kotlinx.serialization.Serializable
 
 @Composable
@@ -24,7 +29,22 @@ fun MainNavigation() {
     navController = navController,
     startDestination = AppRoute.MainPage
   ) {
-    composable<AppRoute.MainPage> { MainScreen(navController = navController) }
+    composable<AppRoute.MainPage> { backStackEntry ->
+      val parentEntry = remember(backStackEntry) {
+        navController.getBackStackEntry(AppRoute.MainPage)
+      }
+
+      val homeVm: HomeViewModel = hiltViewModel(parentEntry)
+      val favsVm: FavoritesViewModel = hiltViewModel(parentEntry)
+      val settingsVm: SettingsViewModel = hiltViewModel(parentEntry)
+
+      MainScreen(
+        navController = navController,
+        homeVm = homeVm,
+        favsVm = favsVm,
+        settingsVm = settingsVm
+      )
+    }
 
     composable<AppRoute.EventDetailPage>(
       enterTransition = { scaleIntoContainer() },

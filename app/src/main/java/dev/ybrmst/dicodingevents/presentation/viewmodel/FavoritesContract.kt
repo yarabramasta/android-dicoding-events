@@ -4,14 +4,14 @@ import androidx.compose.runtime.Immutable
 import dev.ybrmst.dicodingevents.domain.models.EventPreview
 import dev.ybrmst.dicodingevents.lib.ViewModelContract
 
-class HomeContract : ViewModelContract {
+class FavoritesContract : ViewModelContract {
+
   @Immutable
   data class State(
+    val favorites: List<EventPreview>,
     val isFetching: Boolean,
     val isRefreshing: Boolean,
     val error: String? = null,
-    val upcomingEvents: List<EventPreview>,
-    val finishedEvents: List<EventPreview>,
   ) : ViewModelContract.State {
     companion object {
       private val events = listOf(
@@ -23,10 +23,9 @@ class HomeContract : ViewModelContract {
       ).distinctBy { it.id }
 
       fun initial() = State(
+        favorites = events,
         isFetching = false,
         isRefreshing = false,
-        upcomingEvents = events.take(2),
-        finishedEvents = events.takeLast(3)
       )
     }
   }
@@ -35,7 +34,7 @@ class HomeContract : ViewModelContract {
     data object OnFetch : Event()
     data object OnRefresh : Event()
     data class OnEventClicked(val eventId: Int) : Event()
-    data class OnEventFavoriteChanged(val event: EventPreview) : Event()
+    data class OnEventRemoved(val event: EventPreview) : Event()
     data object OnScreenChanged : Event()
   }
 

@@ -62,7 +62,10 @@ class EventsRepositoryImpl @Inject constructor(
   override fun getFavEvents(): Flow<Pair<List<EventPreview>, AppError?>> {
     return flow {
       try {
-        val favEvents = dao.getAllFavoriteEvents().map { it.toPreview() }
+        val favEvents = dao
+          .getAllFavoriteEvents()
+          .map { it.toPreview().copy(isFavorite = true) }
+
         emit(Pair(favEvents, null))
       } catch (e: Exception) {
         e.printStackTrace()

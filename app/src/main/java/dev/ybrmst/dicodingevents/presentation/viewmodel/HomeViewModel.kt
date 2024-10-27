@@ -22,10 +22,28 @@ class HomeViewModel @Inject constructor(
 
   override fun add(event: HomeContract.Event) {
     when (event) {
-      HomeContract.Event.OnFetch -> fetchEvents(isRefresh = false)
-      HomeContract.Event.OnRefresh -> fetchEvents(isRefresh = true)
+      HomeContract.Event.OnFetch -> {
+        setState { copy(isFetching = true, isRefreshing = false) }
+        fetchEvents()
+      }
+      HomeContract.Event.OnRefresh -> {
+        setState { copy(isRefreshing = true, isFetching = false) }
+        fetchEvents()
+      }
       is HomeContract.Event.OnEventClicked -> navigateToDetail(event.eventId)
+
       is HomeContract.Event.OnEventFavoriteChanged -> toggleFavorite(event.event)
+
+      HomeContract.Event.OnScreenChanged -> {
+        setState {
+          copy(
+            isFetching = false,
+            isRefreshing = false,
+            error = null
+          )
+        }
+        fetchEvents()
+      }
     }
   }
 
@@ -33,15 +51,8 @@ class HomeViewModel @Inject constructor(
     add(HomeContract.Event.OnFetch)
   }
 
-  private fun fetchEvents(isRefresh: Boolean) {
+  private fun fetchEvents() {
     viewModelScope.launch {
-      setState {
-        copy(
-          isFetching = !isRefresh,
-          isRefreshing = isRefresh
-        )
-      }
-
       repo.getUpcomingFinishedEvents().collect {
         it
           .onSuccess {

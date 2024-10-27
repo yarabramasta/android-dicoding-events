@@ -30,6 +30,10 @@ class SettingsViewModel @Inject constructor(
     }
   }
 
+  init {
+    add(SettingsContract.Event.OnFetch)
+  }
+
   private fun fetchSettings() = runBlocking {
     val themeMode = dataSource.themeFlow.first()
     val isOptInDailyNotif = dataSource.dailyNotifOptInFlow.first()
@@ -41,9 +45,7 @@ class SettingsViewModel @Inject constructor(
       )
     }
 
-    application.settings.value = application
-      .settings
-      .value
+    application.settings = application.settings
       .copy(themeMode = themeMode, isOptInDailyNotif = isOptInDailyNotif)
   }
 
@@ -52,9 +54,7 @@ class SettingsViewModel @Inject constructor(
       val updatedMode = if (darkMode) ThemeMode.DARK else ThemeMode.LIGHT
 
       dataSource.setThemeMode(updatedMode)
-      application.settings.value = application
-        .settings
-        .value
+      application.settings = application.settings
         .copy(themeMode = updatedMode)
 
       setState { copy(themeMode = updatedMode) }
@@ -66,9 +66,7 @@ class SettingsViewModel @Inject constructor(
       val isOptIn = dataSource.dailyNotifOptInFlow.first()
 
       dataSource.setDailyNotifOptIn(!isOptIn)
-      application.settings.value = application
-        .settings
-        .value
+      application.settings = application.settings
         .copy(isOptInDailyNotif = !isOptIn)
 
       setState { copy(isOptInDailyNotif = !isOptIn) }

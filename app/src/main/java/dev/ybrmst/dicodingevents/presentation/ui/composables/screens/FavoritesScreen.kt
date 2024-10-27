@@ -1,17 +1,13 @@
 package dev.ybrmst.dicodingevents.presentation.ui.composables.screens
 
 import android.widget.Toast
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -33,23 +29,20 @@ import dev.ybrmst.dicodingevents.AppRoute
 import dev.ybrmst.dicodingevents.domain.models.EventPreview
 import dev.ybrmst.dicodingevents.presentation.ui.composables.atoms.EmptyItemsFallback
 import dev.ybrmst.dicodingevents.presentation.ui.composables.atoms.ErrorFallback
-import dev.ybrmst.dicodingevents.presentation.ui.composables.atoms.EventPreviewCard
 import dev.ybrmst.dicodingevents.presentation.ui.composables.atoms.EventPreviewListItem
-import dev.ybrmst.dicodingevents.presentation.ui.composables.atoms.ShimmerBox
 import dev.ybrmst.dicodingevents.presentation.ui.composables.atoms.ShimmerItem
 import dev.ybrmst.dicodingevents.presentation.ui.composables.rememberFlowWithLifecycle
 import dev.ybrmst.dicodingevents.presentation.ui.theme.AppTheme
-import dev.ybrmst.dicodingevents.presentation.viewmodel.HomeContract
-import dev.ybrmst.dicodingevents.presentation.viewmodel.HomeViewModel
+import dev.ybrmst.dicodingevents.presentation.viewmodel.FavoritesContract
+import dev.ybrmst.dicodingevents.presentation.viewmodel.FavoritesViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(
+fun FavoritesScreen(
   modifier: Modifier = Modifier,
   navController: NavController,
-  vm: HomeViewModel = hiltViewModel()
+  vm: FavoritesViewModel = hiltViewModel()
 ) {
-
   val state by vm.state.collectAsStateWithLifecycle()
   val effect = rememberFlowWithLifecycle(vm.effect)
   val context = LocalContext.current
@@ -57,11 +50,10 @@ fun HomeScreen(
   LaunchedEffect(effect) {
     effect.collect { action ->
       when (action) {
-        is HomeContract.Effect.NavigateToDetail -> {
+        is FavoritesContract.Effect.NavigateToDetail -> {
           navController.navigate(AppRoute.EventDetailPage(action.eventId))
         }
-
-        is HomeContract.Effect.ShowToast -> {
+        is FavoritesContract.Effect.ShowToast -> {
           Toast.makeText(
             context,
             action.message,
@@ -74,62 +66,51 @@ fun HomeScreen(
 
   PullToRefreshBox(
     isRefreshing = state.isRefreshing,
-    onRefresh = { vm.add(HomeContract.Event.OnRefresh) },
+    onRefresh = { vm.add(FavoritesContract.Event.OnRefresh) },
     modifier = Modifier.fillMaxSize()
   ) {
-    HomeScreenContent(
+    FavoritesScreenContent(
       modifier = modifier.fillMaxSize(),
-      upcomingEvents = state.upcomingEvents,
-      finishedEvents = state.finishedEvents,
-      isLoading = state.isFetching || state.isRefreshing,
+      events = state.favorites,
+      isLoading = state.isFetching,
       hasError = state.error != null,
       error = state.error,
-      onRetry = {
-        vm.add(HomeContract.Event.OnRefresh)
-      },
-      onEventClick = { eventId ->
-        vm.add(HomeContract.Event.OnEventClicked(eventId))
-      },
-      onFavoriteClick = { eventId ->
-        vm.add(HomeContract.Event.OnEventFavoriteChanged(eventId))
-      },
+      onRetry = { vm.add(FavoritesContract.Event.OnRefresh) },
+      onEventClick = { vm.add(FavoritesContract.Event.OnEventClicked(it.id)) },
+      onFavoriteClick = {
+        vm.add(FavoritesContract.Event.OnEventRemoved(it))
+      }
     )
   }
 }
 
 @Composable
-private fun HomeScreenContent(
+fun FavoritesScreenContent(
   modifier: Modifier = Modifier,
+  events: List<EventPreview>,
   isLoading: Boolean,
   hasError: Boolean,
   error: String?,
   onRetry: () -> Unit,
-  upcomingEvents: List<EventPreview>,
-  finishedEvents: List<EventPreview>,
-  onEventClick: (Int) -> Unit,
+  onEventClick: (EventPreview) -> Unit,
   onFavoriteClick: (EventPreview) -> Unit,
 ) {
   Box(modifier = modifier.fillMaxSize()) {
     if (!isLoading && !hasError) {
-      if (upcomingEvents.isEmpty() && finishedEvents.isEmpty()) {
-        EmptyItemsFallback(onRefresh = onRetry)
+      if (events.isEmpty()) {
+        EmptyItemsFallback(
+          onRefresh = onRetry,
+          message = "You have no favorite events."
+        )
       } else {
         LazyColumn {
           buildHeadline()
-          buildUpcomingEventsLayout(upcomingEvents) { event ->
-            EventPreviewCard(
-              event = event,
-              onClick = { onEventClick(event.id) },
-              onFavoriteClick = { onFavoriteClick(event) },
-              isFavorite = event.isFavorite
-            )
-          }
-          buildFinishedEventsLayout(finishedEvents) { event ->
+          items(events) { event ->
             EventPreviewListItem(
               event = event,
-              onClick = { onEventClick(event.id) },
-              onFavoriteClick = { onFavoriteClick(event) },
-              isFavorite = event.isFavorite
+              isFavorite = event.isFavorite,
+              onClick = onEventClick,
+              onFavoriteClick = onFavoriteClick
             )
           }
         }
@@ -139,16 +120,13 @@ private fun HomeScreenContent(
     if (isLoading) {
       LazyColumn {
         buildHeadline()
-        buildUpcomingEventsLayout(upcomingEvents) {
-          ShimmerBox(
-            modifier = Modifier.size(240.dp)
-          )
-        }
-        buildFinishedEventsLayout(finishedEvents) { ShimmerItem() }
+        items(events) { ShimmerItem() }
       }
     }
 
-    if (hasError) ErrorFallback(message = error, onRetry = onRetry)
+    if (hasError) {
+      ErrorFallback(message = error, onRetry = onRetry)
+    }
   }
 }
 
@@ -156,7 +134,7 @@ private fun LazyListScope.buildHeadline() {
   item {
     Spacer(modifier = Modifier.height(16.dp))
     Text(
-      "Dicoding Events",
+      "Favorite Events",
       style = MaterialTheme.typography.headlineMedium,
       color = MaterialTheme.colorScheme.primary,
       fontWeight = FontWeight.SemiBold,
@@ -164,7 +142,7 @@ private fun LazyListScope.buildHeadline() {
     )
     Spacer(modifier = Modifier.height(8.dp))
     Text(
-      "Discover all events held by Dicoding from the upcoming to the finished ones.",
+      "Here are your favorite events.",
       style = MaterialTheme.typography.bodyLarge,
       color = MaterialTheme.colorScheme.onSurfaceVariant,
       modifier = Modifier.padding(horizontal = 16.dp)
@@ -173,68 +151,28 @@ private fun LazyListScope.buildHeadline() {
   }
 }
 
-private fun LazyListScope.buildUpcomingEventsLayout(
-  events: List<EventPreview>,
-  item: @Composable (EventPreview) -> Unit,
-) {
-  item {
-    Text(
-      "Upcoming Events",
-      style = MaterialTheme.typography.titleLarge,
-      fontWeight = FontWeight.SemiBold,
-      modifier = Modifier.padding(horizontal = 16.dp)
-    )
-    Spacer(modifier = Modifier.height(16.dp))
-    LazyRow(
-      horizontalArrangement = Arrangement.spacedBy(16.dp),
-      contentPadding = PaddingValues(horizontal = 16.dp)
-    ) {
-      items(items = events, key = { it.id }) { item(it) }
-    }
-    Spacer(modifier = Modifier.height(24.dp))
-  }
-}
-
-private fun LazyListScope.buildFinishedEventsLayout(
-  events: List<EventPreview>,
-  item: @Composable (EventPreview) -> Unit,
-) {
-  item {
-    Text(
-      "Finished Events",
-      style = MaterialTheme.typography.titleLarge,
-      fontWeight = FontWeight.SemiBold,
-      modifier = Modifier.padding(horizontal = 16.dp)
-    )
-    Spacer(modifier = Modifier.height(16.dp))
-  }
-  items(items = events, key = { it.id }) { item(it) }
-  item { Spacer(modifier = Modifier.height(16.dp)) }
-}
-
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-private fun HomeScreenLoading() {
+private fun FavoritesScreenPreview() {
   val events = listOf(
     EventPreview.fake(),
     EventPreview.fake(),
     EventPreview.fake(),
     EventPreview.fake(),
     EventPreview.fake(),
-  )
+  ).distinctBy { it.id }
 
   AppTheme {
-    Scaffold {
-      HomeScreenContent(
-        isLoading = true,
+    Scaffold { innerPadding ->
+      FavoritesScreenContent(
+        modifier = Modifier.padding(innerPadding),
+        events = events,
+        isLoading = false,
         hasError = false,
         error = null,
         onRetry = {},
-        upcomingEvents = events.take(2),
-        finishedEvents = events.take(3),
         onEventClick = {},
-        onFavoriteClick = {},
-        modifier = Modifier.padding(it),
+        onFavoriteClick = {}
       )
     }
   }
@@ -242,27 +180,26 @@ private fun HomeScreenLoading() {
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-private fun HomeScreenLoaded() {
+private fun FavoritesScreenLoadingPreview() {
   val events = listOf(
     EventPreview.fake(),
     EventPreview.fake(),
     EventPreview.fake(),
     EventPreview.fake(),
     EventPreview.fake(),
-  )
+  ).distinctBy { it.id }
 
   AppTheme {
-    Scaffold {
-      HomeScreenContent(
-        isLoading = false,
+    Scaffold { innerPadding ->
+      FavoritesScreenContent(
+        modifier = Modifier.padding(innerPadding),
+        events = events,
+        isLoading = true,
         hasError = false,
         error = null,
         onRetry = {},
-        upcomingEvents = events.take(2),
-        finishedEvents = events.take(3),
         onEventClick = {},
-        onFavoriteClick = {},
-        modifier = Modifier.padding(it)
+        onFavoriteClick = {}
       )
     }
   }

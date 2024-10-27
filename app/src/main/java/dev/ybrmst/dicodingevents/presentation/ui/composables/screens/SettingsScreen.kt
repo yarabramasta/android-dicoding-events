@@ -34,8 +34,10 @@ import dev.ybrmst.dicodingevents.presentation.viewmodel.SettingsContract
 import dev.ybrmst.dicodingevents.presentation.viewmodel.SettingsViewModel
 
 @Composable
-fun SettingsScreen(modifier: Modifier = Modifier) {
-  val vm = hiltViewModel<SettingsViewModel>()
+fun SettingsScreen(
+  modifier: Modifier = Modifier,
+  vm: SettingsViewModel = hiltViewModel(),
+) {
   val settings by vm.state.collectAsState()
   val isDarkMode = isDarkThemeEnabled(settings.themeMode)
 
