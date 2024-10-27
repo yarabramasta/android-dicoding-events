@@ -16,6 +16,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import dev.ybrmst.dicodingevents.presentation.ui.composables.screens.EventDetailScreen
 import dev.ybrmst.dicodingevents.presentation.ui.composables.screens.MainScreen
+import dev.ybrmst.dicodingevents.presentation.viewmodel.DiscoverViewModel
 import dev.ybrmst.dicodingevents.presentation.viewmodel.FavoritesViewModel
 import dev.ybrmst.dicodingevents.presentation.viewmodel.HomeViewModel
 import dev.ybrmst.dicodingevents.presentation.viewmodel.SettingsViewModel
@@ -35,12 +36,14 @@ fun MainNavigation() {
       }
 
       val homeVm: HomeViewModel = hiltViewModel(parentEntry)
+      val discoverVm: DiscoverViewModel = hiltViewModel(parentEntry)
       val favsVm: FavoritesViewModel = hiltViewModel(parentEntry)
       val settingsVm: SettingsViewModel = hiltViewModel(parentEntry)
 
       MainScreen(
         navController = navController,
         homeVm = homeVm,
+        discoverVm = discoverVm,
         favsVm = favsVm,
         settingsVm = settingsVm
       )
@@ -90,6 +93,6 @@ internal fun scaleOutOfContainer(
   ) + fadeOut(animationSpec = tween(delayMillis = 90))
 }
 
-enum class ScaleTransition {
+internal enum class ScaleTransition {
   INWARDS, OUTWARDS
 }

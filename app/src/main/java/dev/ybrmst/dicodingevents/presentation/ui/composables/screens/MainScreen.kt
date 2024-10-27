@@ -26,6 +26,8 @@ import dev.ybrmst.dicodingevents.presentation.ui.composables.atoms.BottomNavItem
 import dev.ybrmst.dicodingevents.presentation.ui.composables.atoms.MainScreenBottomNavBar
 import dev.ybrmst.dicodingevents.presentation.ui.composables.atoms.Placeholder
 import dev.ybrmst.dicodingevents.presentation.ui.theme.AppTheme
+import dev.ybrmst.dicodingevents.presentation.viewmodel.DiscoverContract
+import dev.ybrmst.dicodingevents.presentation.viewmodel.DiscoverViewModel
 import dev.ybrmst.dicodingevents.presentation.viewmodel.FavoritesContract
 import dev.ybrmst.dicodingevents.presentation.viewmodel.FavoritesViewModel
 import dev.ybrmst.dicodingevents.presentation.viewmodel.HomeContract
@@ -37,6 +39,7 @@ fun MainScreen(
   modifier: Modifier = Modifier,
   navController: NavController,
   homeVm: HomeViewModel = hiltViewModel(),
+  discoverVm: DiscoverViewModel = hiltViewModel(),
   favsVm: FavoritesViewModel = hiltViewModel(),
   settingsVm: SettingsViewModel = hiltViewModel(),
 ) {
@@ -45,6 +48,7 @@ fun MainScreen(
     onItemSelected = { index ->
       when (index) {
         0 -> homeVm.add(HomeContract.Event.OnScreenChanged)
+        1 -> discoverVm.add(DiscoverContract.Event.OnScreenChanged)
         2 -> favsVm.add(FavoritesContract.Event.OnScreenChanged)
       }
     }
