@@ -3,7 +3,6 @@ package dev.ybrmst.dicodingevents.presentation.viewmodel
 import androidx.compose.runtime.Immutable
 import dev.ybrmst.dicodingevents.domain.models.EventPreview
 import dev.ybrmst.dicodingevents.lib.ViewModelContract
-import dev.ybrmst.dicodingevents.presentation.viewmodel.HomeContract.Event
 
 class DiscoverContract : ViewModelContract {
   enum class EventCategory {

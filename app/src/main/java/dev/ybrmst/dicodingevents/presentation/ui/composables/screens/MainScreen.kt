@@ -60,8 +60,10 @@ fun MainScreen(
         vm = homeVm,
       )
 
-      "Discover" -> Placeholder(
-        modifier = Modifier.padding(innerPadding)
+      "Discover" -> DiscoverScreen(
+        modifier = Modifier.padding(innerPadding),
+        navController = navController,
+        vm = discoverVm,
       )
 
       "Favorites" -> FavoritesScreen(
