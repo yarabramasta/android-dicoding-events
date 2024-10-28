@@ -30,7 +30,7 @@ import dev.ybrmst.dicodingevents.presentation.viewmodel.SettingsViewModel
 @Composable
 fun EmptyItemsFallback(
   modifier: Modifier = Modifier,
-  onRefresh: () -> Unit,
+  onRefresh: (() -> Unit)? = null,
   message: String? = null,
 ) {
   val vm = hiltViewModel<SettingsViewModel>()
@@ -49,7 +49,7 @@ private fun EmptyItemsFallbackContent(
   modifier: Modifier,
   isDarkTheme: Boolean = false,
   message: String? = null,
-  onRefresh: () -> Unit,
+  onRefresh: (() -> Unit)? = null,
 ) {
   Column(
     verticalArrangement = Arrangement.Center,
@@ -74,15 +74,17 @@ private fun EmptyItemsFallbackContent(
       style = MaterialTheme.typography.bodyLarge
     )
     Spacer(modifier = Modifier.height(16.dp))
-    FilledTonalButton(onClick = onRefresh) {
-      Text("Refresh")
+    if (onRefresh != null) {
+      FilledTonalButton(onClick = onRefresh) {
+        Text("Refresh")
+      }
     }
   }
 }
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun EmptyItemsFallbackPreview() {
+private fun EmptyItemsFallbackPreview() {
   AppTheme {
     Scaffold {
       EmptyItemsFallbackContent(

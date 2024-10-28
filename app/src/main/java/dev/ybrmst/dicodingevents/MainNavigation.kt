@@ -48,7 +48,7 @@ fun MainNavigation() {
 
         EventDetailScreen(
           eventId = eventId,
-          navController = navController,
+          onPop = { navController.popBackStack() },
         )
       }
     }

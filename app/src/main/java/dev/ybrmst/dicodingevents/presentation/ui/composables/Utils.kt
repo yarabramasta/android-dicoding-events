@@ -1,8 +1,20 @@
 package dev.ybrmst.dicodingevents.presentation.ui.composables
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
+import androidx.compose.ui.focus.onFocusEvent
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
@@ -60,4 +72,31 @@ inline fun <reified T : ViewModel> NavBackStackEntry.scopedViewModel(
   }
 
   return hiltViewModel(parentEntry)
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Stable
+fun Modifier.clearFocusOnKeyboardDismiss(): Modifier = composed {
+  var isFocused by remember { mutableStateOf(false) }
+  var keyboardAppearedSinceLastFocus by remember { mutableStateOf(false) }
+
+  if (isFocused) {
+    val imeIsVisible = WindowInsets.isImeVisible
+    val focusManager = LocalFocusManager.current
+
+    LaunchedEffect(imeIsVisible) {
+      if (imeIsVisible) {
+        keyboardAppearedSinceLastFocus = true
+      } else if (keyboardAppearedSinceLastFocus) {
+        focusManager.clearFocus()
+      }
+    }
+  }
+
+  onFocusEvent {
+    if (isFocused != it.isFocused) {
+      isFocused = it.isFocused
+      if (isFocused) keyboardAppearedSinceLastFocus = false
+    }
+  }
 }

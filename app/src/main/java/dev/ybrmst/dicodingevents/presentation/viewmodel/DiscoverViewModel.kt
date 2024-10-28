@@ -27,7 +27,7 @@ class DiscoverViewModel @Inject constructor(
 
   override fun add(event: DiscoverContract.Event) {
     when (event) {
-      is DiscoverContract.Event.OnFetching -> {
+      is DiscoverContract.Event.OnFetch -> {
         updateStateForCategory(
           category = event.category,
           isFetching = true
@@ -35,7 +35,7 @@ class DiscoverViewModel @Inject constructor(
         fetchEvents(category = event.category)
       }
 
-      is DiscoverContract.Event.OnRefreshing -> {
+      is DiscoverContract.Event.OnRefresh -> {
         updateStateForCategory(
           category = event.category,
           isRefreshing = true
@@ -44,6 +44,8 @@ class DiscoverViewModel @Inject constructor(
       }
 
       is DiscoverContract.Event.OnSearchQueryChanged -> {
+        searchJob?.cancel()
+
         if (event.query.isBlank()) {
           updateStateForCategory(
             category = event.category,
@@ -56,7 +58,6 @@ class DiscoverViewModel @Inject constructor(
             isSearching = true,
             searchQuery = event.query
           )
-          searchJob?.cancel()
           searchJob = viewModelScope.launch {
             delay(500L)
             fetchEvents(event.query, event.category)
@@ -65,8 +66,37 @@ class DiscoverViewModel @Inject constructor(
       }
 
       is DiscoverContract.Event.OnEventFavoriteChanged -> {
-        toggleFavorite(event.event, event.category)
+        sendEffect(
+          DiscoverContract.Effect.ShowToast(
+            if (event.isFavorite) "Event removed from favorites"
+            else "Event added to favorites"
+          )
+        )
       }
+
+      is DiscoverContract.Event.OnSearchQueryCleared -> {
+        setState {
+          when (event.category) {
+            DiscoverContract.EventCategory.UPCOMING -> copy(
+              searchQueryUpcoming = "",
+              isSearchingUpcoming = false
+            )
+
+            DiscoverContract.EventCategory.FINISHED -> copy(
+              searchQueryFinished = "",
+              isSearchingFinished = false
+            )
+          }
+        }
+        fetchEvents(category = event.category)
+      }
+    }
+  }
+
+  init {
+    viewModelScope.launch {
+      fetchEvents(category = DiscoverContract.EventCategory.UPCOMING)
+      fetchEvents(category = DiscoverContract.EventCategory.FINISHED)
     }
   }
 
@@ -103,46 +133,6 @@ class DiscoverViewModel @Inject constructor(
     }
   }
 
-  private fun toggleFavorite(
-    event: EventPreview,
-    category: DiscoverContract.EventCategory,
-  ) {
-    viewModelScope.launch {
-      val (updatedEvent, error) = if (event.isFavorite) {
-        repo.removeFavEvent(event)
-      } else {
-        repo.addFavEvent(event)
-      }
-
-      if (error != null) {
-        setState {
-          copy(
-            errorUpcoming = error.message
-              ?: "Uh oh! Unexpected error occurred.\nPlease try again."
-          )
-        }
-      } else {
-        val updatedEvents = when (category) {
-          DiscoverContract.EventCategory.UPCOMING -> state.value.upcomingEvents
-          DiscoverContract.EventCategory.FINISHED -> state.value.finishedEvents
-        }.map {
-          if (it.id == updatedEvent.id) updatedEvent else it
-        }
-
-        updateStateForCategory(
-          category = category,
-          events = updatedEvents
-        )
-      }
-
-      sendEffect(
-        DiscoverContract.Effect.ShowToast(
-          if (updatedEvent.isFavorite) "Event added to favorites."
-          else "Event removed from favorites."
-        )
-      )
-    }
-  }
 
   private fun updateStateForCategory(
     category: DiscoverContract.EventCategory,

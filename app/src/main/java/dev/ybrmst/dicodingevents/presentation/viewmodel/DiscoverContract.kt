@@ -57,19 +57,18 @@ class DiscoverContract : ViewModelContract {
   }
 
   sealed class Event : ViewModelContract.Event {
-    data class OnFetching(val category: EventCategory) : Event()
+    data class OnFetch(val category: EventCategory) : Event()
 
-    data class OnRefreshing(val category: EventCategory) : Event()
+    data class OnRefresh(val category: EventCategory) : Event()
 
     data class OnSearchQueryChanged(
       val query: String,
       val category: EventCategory,
     ) : Event()
 
-    data class OnEventFavoriteChanged(
-      val event: EventPreview,
-      val category: EventCategory,
-    ) : Event()
+    data class OnSearchQueryCleared(val category: EventCategory) : Event()
+
+    data class OnEventFavoriteChanged(val isFavorite: Boolean) : Event()
   }
 
   sealed class Effect : ViewModelContract.Effect {

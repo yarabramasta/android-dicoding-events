@@ -21,7 +21,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -62,8 +61,12 @@ fun SettingsScreenContent(
   isOptInDailyNotif: Boolean,
   onToggleOptInDailyNotif: () -> Unit,
 ) {
-  var darkMode by remember(isDarkMode) { mutableStateOf(isDarkMode) }
-  var dailyNotifOptIn by remember(isOptInDailyNotif) { mutableStateOf(isOptInDailyNotif) }
+  val darkMode by remember(isDarkMode) { mutableStateOf(isDarkMode) }
+  val dailyNotifOptIn by remember(isOptInDailyNotif) {
+    mutableStateOf(
+      isOptInDailyNotif
+    )
+  }
 
   LazyColumn(modifier = modifier.fillMaxSize()) {
     item {

@@ -89,7 +89,7 @@ private fun ErrorFallbackContent(
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun ErrorFallbackPreview() {
+private fun ErrorFallbackPreview() {
   AppTheme {
     Scaffold {
       ErrorFallbackContent(
