@@ -60,6 +60,7 @@ dependencies {
 
   implementation(libs.kotlinx.serialization.json)
   implementation(libs.kotlinx.datetime)
+  implementation(libs.kotlinx.work)
 
   implementation(libs.androidx.core.ktx)
   implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -90,6 +91,7 @@ dependencies {
   implementation(libs.hilt)
   ksp(libs.hilt.compiler)
   implementation(libs.hilt.navigation.compose)
+  implementation(libs.hilt.work)
 
   implementation(libs.okhttp)
   implementation(libs.okhttp.loggingInterceptor)

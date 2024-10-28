@@ -2,6 +2,7 @@
 agp = "8.5.2"
 kotlin = "2.0.21"
 coreKtx = "1.13.1"
+workKtx = "2.9.1"
 lifecycleRuntimeKtx = "2.8.6"
 ksp = "2.0.21-1.0.25"
 composeBom = "2024.10.00"
@@ -18,6 +19,7 @@ room = "2.6.1"
 coil = "3.0.0-rc01"
 hiltAndroid = "2.52"
 hiltNavigationCompose = "1.2.0"
+hiltWork = "1.0.0"
 datastore = "1.1.1"
 datetime = "0.6.1"
 desugarJdk = "2.1.2"
@@ -27,6 +29,7 @@ sandwich = "2.0.10"
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "datetime" }
+kotlinx-work = { module = "androidx.work:work-runtime-ktx", version.ref = "workKtx" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -51,6 +54,7 @@ android-desugar-jdk = { module = "com.android.tools:desugar_jdk_libs", version.r
 hilt = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
 hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hiltAndroid" }
 hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
+hilt-work = { module = "androidx.hilt:hilt-work", version.ref = "hiltWork" }
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 okhttp-loggingInterceptor = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "okhttp" }
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
