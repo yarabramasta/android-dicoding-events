@@ -1,17 +1,18 @@
 plugins {
   alias(libs.plugins.android.application)
+  alias(libs.plugins.devtools.ksp)
+  alias(libs.plugins.jetbrains.compose.compiler)
   alias(libs.plugins.jetbrains.kotlin.android)
-  alias(libs.plugins.kotlin.serialization)
-  alias(libs.plugins.ksp)
-  alias(libs.plugins.compose.compiler)
+  alias(libs.plugins.jetbrains.kotlin.serialization)
+  alias(libs.plugins.hilt.android)
 }
 
 android {
-  namespace = "dev.ybrmst.dicoding_events"
+  namespace = "dev.ybrmst.dicodingevents"
   compileSdk = 34
 
   defaultConfig {
-    applicationId = "dev.ybrmst.dicoding_events"
+    applicationId = "dev.ybrmst.dicodingevents"
     minSdk = 24
     targetSdk = 34
     versionCode = 1
@@ -34,20 +35,18 @@ android {
   }
 
   compileOptions {
+    isCoreLibraryDesugaringEnabled = true
+
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
   }
 
   kotlinOptions {
-    jvmTarget = "17"
+    jvmTarget = JavaVersion.VERSION_17.toString()
   }
 
   buildFeatures {
     compose = true
-  }
-
-  composeOptions {
-    kotlinCompilerExtensionVersion = "1.5.14"
   }
 
   packaging {
@@ -59,32 +58,48 @@ android {
 
 dependencies {
 
+  implementation(libs.kotlinx.serialization.json)
+  implementation(libs.kotlinx.datetime)
+
   implementation(libs.androidx.core.ktx)
   implementation(libs.androidx.lifecycle.runtime.ktx)
   implementation(libs.androidx.activity.compose)
   implementation(platform(libs.androidx.compose.bom))
-  implementation(libs.androidx.ui)
-  implementation(libs.androidx.ui.graphics)
-  implementation(libs.androidx.ui.tooling.preview)
-  implementation(libs.androidx.material3)
-  implementation(libs.androidx.ui.text.google.fonts)
+  implementation(libs.androidx.compose.ui)
+  implementation(libs.androidx.compose.ui.graphics)
+  implementation(libs.androidx.compose.ui.tooling.preview)
+  implementation(libs.androidx.compose.material3)
+  implementation(libs.androidx.compose.ui.text.google.fonts)
   implementation(libs.androidx.compose.material.iconsExtended)
   implementation(libs.androidx.navigation.compose)
-  implementation(libs.kotlinx.serialization.json)
+  implementation(libs.androidx.datastore.preferences)
+  coreLibraryDesugaring(libs.android.desugar.jdk)
 
   testImplementation(libs.junit)
   androidTestImplementation(libs.androidx.junit)
   androidTestImplementation(libs.androidx.espresso.core)
   androidTestImplementation(platform(libs.androidx.compose.bom))
-  androidTestImplementation(libs.androidx.ui.test.junit4)
-  debugImplementation(libs.androidx.ui.tooling)
-  debugImplementation(libs.androidx.ui.test.manifest)
-
-  implementation(libs.bundles.retrofit)
-  implementation(libs.bundles.koin)
-  implementation(libs.bundles.coil)
+  androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+  debugImplementation(libs.androidx.compose.ui.tooling)
+  debugImplementation(libs.androidx.compose.ui.test.manifest)
 
   implementation(libs.androidx.room.runtime)
   ksp(libs.androidx.room.compiler)
   implementation(libs.androidx.room)
+
+  implementation(libs.hilt)
+  ksp(libs.hilt.compiler)
+  implementation(libs.hilt.navigation.compose)
+
+  implementation(libs.okhttp)
+  implementation(libs.okhttp.loggingInterceptor)
+  implementation(libs.retrofit)
+  implementation(libs.retrofit.kotlinx.serialization)
+
+  implementation(libs.coil)
+  implementation(libs.coil.networkOkhttp)
+
+  implementation(libs.sandwich)
+  implementation(libs.sandwich.retrofit)
+  implementation(libs.sandwich.retrofit.serialization)
 }
