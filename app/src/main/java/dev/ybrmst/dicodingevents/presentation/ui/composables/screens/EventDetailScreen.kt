@@ -2,8 +2,9 @@ package dev.ybrmst.dicodingevents.presentation.ui.composables.screens
 
 import android.content.Intent
 import android.net.Uri
+import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -38,10 +39,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -50,13 +52,18 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.SubcomposeAsyncImage
 import dev.ybrmst.dicodingevents.domain.models.EventDetail
 import dev.ybrmst.dicodingevents.domain.models.getDisplayDate
 import dev.ybrmst.dicodingevents.domain.models.getRemainingQuota
 import dev.ybrmst.dicodingevents.presentation.ui.composables.atoms.HtmlRenderer
 import dev.ybrmst.dicodingevents.presentation.ui.composables.atoms.ShimmerBox
+import dev.ybrmst.dicodingevents.presentation.ui.composables.rememberFlowWithLifecycle
 import dev.ybrmst.dicodingevents.presentation.ui.theme.AppTheme
+import dev.ybrmst.dicodingevents.presentation.viewmodel.EventDetailContract
+import dev.ybrmst.dicodingevents.presentation.viewmodel.EventDetailViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,20 +71,43 @@ fun EventDetailScreen(
   modifier: Modifier = Modifier,
   onPop: () -> Unit,
   eventId: Int,
+  vm: EventDetailViewModel = hiltViewModel(),
 ) {
+  val state by vm.state.collectAsStateWithLifecycle()
+  val effect = rememberFlowWithLifecycle(vm.effect)
+  val context = LocalContext.current
+
+  LaunchedEffect(effect) {
+    effect.collect {
+      when (it) {
+        is EventDetailContract.Effect.ShowToast -> {
+          Toast.makeText(
+            context,
+            it.message,
+            Toast.LENGTH_SHORT
+          ).show()
+        }
+      }
+    }
+  }
+
   PullToRefreshBox(
-    isRefreshing = false,
-    onRefresh = {},
+    isRefreshing = state.isRefreshing,
+    onRefresh = { vm.add(EventDetailContract.Event.OnRefresh(eventId)) },
     modifier = modifier.fillMaxSize(),
   ) {
     EventDetailScreenContent(
       modifier = modifier,
-      event = null,
-      isLoading = true,
-      error = null,
+      event = state.event,
+      isLoading = state.isFetching || state.isRefreshing,
+      error = state.error,
       onPop = onPop,
-      onRetry = {},
-      onFavoriteClick = {},
+      onRetry = {
+        vm.add(EventDetailContract.Event.OnRefresh(eventId))
+      },
+      onFavoriteClick = {
+        vm.add(EventDetailContract.Event.OnFavoriteChanged)
+      },
     )
   }
 }
@@ -90,7 +120,7 @@ private fun EventDetailScreenContent(
   error: String?,
   onPop: () -> Unit,
   onRetry: () -> Unit,
-  onFavoriteClick: (Boolean) -> Unit,
+  onFavoriteClick: () -> Unit,
 ) {
   Scaffold(
     modifier = modifier.fillMaxSize(),
@@ -129,6 +159,8 @@ private fun EventDetailScreenContent(
       }
     }
   }
+
+  BackHandler { onPop() }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -138,7 +170,7 @@ private fun EventDetailTopBar(
   isLoading: Boolean,
   error: String?,
   onPop: () -> Unit,
-  onFavoriteClick: (Boolean) -> Unit,
+  onFavoriteClick: () -> Unit,
 ) {
   TopAppBar(
     title = {
@@ -147,7 +179,7 @@ private fun EventDetailTopBar(
           event.name,
           maxLines = 1,
           overflow = TextOverflow.Ellipsis,
-          style = MaterialTheme.typography.titleSmall,
+          style = MaterialTheme.typography.titleMedium,
           color = MaterialTheme.colorScheme.onSurfaceVariant
         )
       }
@@ -159,13 +191,18 @@ private fun EventDetailTopBar(
     },
     actions = {
       IconButton(
-        onClick = { onFavoriteClick(event?.isFavorite ?: false) },
+        onClick = {
+          if (event != null) {
+            onFavoriteClick()
+          }
+        },
         enabled = !isLoading && (event != null || !error.isNullOrBlank())
       ) {
         Icon(
           if (event?.isFavorite == true) Icons.Filled.Star
           else Icons.Outlined.StarOutline,
-          contentDescription = null
+          contentDescription = null,
+          tint = MaterialTheme.colorScheme.tertiary
         )
       }
     },
@@ -320,10 +357,11 @@ fun LazyListScope.buildContent(event: EventDetail) {
   )
 
   item {
+    Spacer(modifier = Modifier.height(16.dp))
     Column(
       modifier = Modifier
         .fillMaxSize()
-        .padding(16.dp)
+        .padding(horizontal = 16.dp)
     ) {
       Text(
         event.cityName,
@@ -348,11 +386,11 @@ fun LazyListScope.buildContent(event: EventDetail) {
         overflow = TextOverflow.Ellipsis,
       )
     }
-    Spacer(modifier = Modifier.height(24.dp))
+    Spacer(modifier = Modifier.height(16.dp))
   }
   items(metadata) { EventDetailMetadata(it) }
   item {
-    Spacer(modifier = Modifier.height(24.dp))
+    Spacer(modifier = Modifier.height(16.dp))
     HtmlRenderer(
       html = event.description,
       modifier = Modifier.padding(horizontal = 16.dp)
@@ -372,7 +410,7 @@ private fun EventDetailMetadata(metadata: EventDetailMetadataItem) {
     verticalAlignment = Alignment.CenterVertically,
     modifier = Modifier
       .fillMaxWidth()
-      .padding(horizontal = 24.dp)
+      .padding(horizontal = 16.dp, vertical = 4.dp)
   ) {
     Icon(
       imageVector = metadata.icon,

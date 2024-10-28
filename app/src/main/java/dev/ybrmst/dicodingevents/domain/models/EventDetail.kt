@@ -164,5 +164,6 @@ fun EventDetail.toPreview(): EventPreview {
     summary = summary,
     cityName = cityName,
     imageLogo = imageLogo,
+    isFavorite = isFavorite,
   )
 }

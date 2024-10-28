@@ -1,7 +1,6 @@
 package dev.ybrmst.dicodingevents.data.repositories
 
 import com.skydoves.sandwich.ApiResponse
-import com.skydoves.sandwich.mapSuccess
 import com.skydoves.sandwich.suspendMapSuccess
 import dev.ybrmst.dicodingevents.data.local.FavoriteEventDao
 import dev.ybrmst.dicodingevents.data.local.toPreview
@@ -99,13 +98,13 @@ class EventsRepositoryImpl @Inject constructor(
   }
 
   override suspend fun getEventDetail(id: Int): ApiResponse<EventDetail> {
-    val detail = api.getEventDetail(id)
-
-    if (detail is ApiResponse.Failure) return detail
-
-    val favorite = dao.getFavoriteEventById(id)
-    if (favorite != null) detail.mapSuccess { this.copy(isFavorite = true) }
-
-    return detail
+    return withContext(ioDispatcher) {
+      api
+        .getEventDetail(id)
+        .suspendMapSuccess {
+          val favorite = dao.getFavoriteEventById(id)
+          copy(isFavorite = favorite != null)
+        }
+    }
   }
 }

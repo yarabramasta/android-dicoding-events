@@ -16,6 +16,7 @@ import androidx.navigation.toRoute
 import dev.ybrmst.dicodingevents.presentation.ui.composables.scopedViewModel
 import dev.ybrmst.dicodingevents.presentation.ui.composables.screens.EventDetailScreen
 import dev.ybrmst.dicodingevents.presentation.ui.composables.screens.MainScreen
+import dev.ybrmst.dicodingevents.presentation.viewmodel.FavoritesContract
 import dev.ybrmst.dicodingevents.presentation.viewmodel.FavoritesViewModel
 import kotlinx.serialization.Serializable
 
@@ -48,7 +49,10 @@ fun MainNavigation() {
 
         EventDetailScreen(
           eventId = eventId,
-          onPop = { navController.popBackStack() },
+          onPop = {
+            navController.popBackStack()
+            favsVm.add(FavoritesContract.Event.OnFetch)
+          },
         )
       }
     }

@@ -11,10 +11,24 @@ class EventDetailContract : ViewModelContract {
     val isRefreshing: Boolean,
     val error: String?,
     val event: EventDetail?,
-  ) : ViewModelContract.State
+  ) : ViewModelContract.State {
+    companion object {
+      fun initial() = State(
+        isFetching = false,
+        isRefreshing = false,
+        error = null,
+        event = null
+      )
+    }
+  }
 
   sealed class Event : ViewModelContract.Event {
     data class OnFetch(val eventId: Int) : Event()
     data class OnRefresh(val eventId: Int) : Event()
+    data object OnFavoriteChanged : Event()
+  }
+
+  sealed class Effect : ViewModelContract.Effect {
+    data class ShowToast(val message: String) : Effect()
   }
 }
