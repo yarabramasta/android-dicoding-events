@@ -66,18 +66,13 @@ class DiscoverContract : ViewModelContract {
       val category: EventCategory,
     ) : Event()
 
-    data class OnEventClicked(val eventId: Int) : Event()
-
     data class OnEventFavoriteChanged(
       val event: EventPreview,
       val category: EventCategory,
     ) : Event()
-
-    data object OnScreenChanged : Event()
   }
 
   sealed class Effect : ViewModelContract.Effect {
-    data class NavigateToEventDetail(val eventId: Int) : Effect()
     data class ShowToast(val message: String) : Effect()
   }
 }

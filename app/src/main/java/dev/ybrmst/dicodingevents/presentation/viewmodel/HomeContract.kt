@@ -34,13 +34,10 @@ class HomeContract : ViewModelContract {
   sealed class Event : ViewModelContract.Event {
     data object OnFetch : Event()
     data object OnRefresh : Event()
-    data class OnEventClicked(val eventId: Int) : Event()
-    data class OnEventFavoriteChanged(val event: EventPreview) : Event()
-    data object OnScreenChanged : Event()
+    data class OnFavoriteChanged(val isFavorite: Boolean) : Event()
   }
 
   sealed class Effect : ViewModelContract.Effect {
-    data class NavigateToDetail(val eventId: Int) : Effect()
     data class ShowToast(val message: String) : Effect()
   }
 }

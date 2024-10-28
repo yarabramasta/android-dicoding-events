@@ -19,30 +19,9 @@ class FavoritesViewModel @Inject constructor(
 
   override fun add(event: FavoritesContract.Event) {
     when (event) {
-      FavoritesContract.Event.OnFetch -> {
-        setState { copy(isFetching = true, isRefreshing = false) }
-        fetchFavEvents()
-      }
-
-      FavoritesContract.Event.OnRefresh -> {
-        setState { copy(isRefreshing = true, isFetching = false) }
-        fetchFavEvents()
-      }
-
-      is FavoritesContract.Event.OnEventClicked -> navigateToDetail(event.eventId)
-
+      FavoritesContract.Event.OnFetch -> fetchFavEvents()
+      is FavoritesContract.Event.OnEventAdded -> addFavorite(event.event)
       is FavoritesContract.Event.OnEventRemoved -> removeFavorite(event.event)
-
-      FavoritesContract.Event.OnScreenChanged -> {
-        setState {
-          copy(
-            isFetching = false,
-            isRefreshing = false,
-            error = null
-          )
-        }
-        fetchFavEvents()
-      }
     }
   }
 
@@ -53,36 +32,46 @@ class FavoritesViewModel @Inject constructor(
   private fun fetchFavEvents() {
     viewModelScope.launch {
       repo.getFavEvents().collect { (events, error) ->
-        if (error != null) {
-          setState {
-            copy(
-              isFetching = false,
-              isRefreshing = false,
-              error = error.message
-            )
-          }
-        } else {
-          setState {
-            copy(
-              isFetching = false,
-              isRefreshing = false,
-              favorites = events
-            )
-          }
-        }
+        if (error != null) setState { copy(error = error.message) }
+        else setState { copy(events = events) }
       }
     }
   }
 
-  private fun navigateToDetail(eventId: Int) {
-    sendEffect(FavoritesContract.Effect.NavigateToDetail(eventId))
+  private fun addFavorite(event: EventPreview) {
+    viewModelScope.launch {
+      val (updatedEvent, error) = repo.addFavEvent(event)
+
+      if (error != null) {
+        setState { copy(error = "Failed to add event to favorites.") }
+      } else {
+        setState { copy(events = events + updatedEvent) }
+        sendEffect(FavoritesContract.Effect.ShowToast("Event added to favorites."))
+      }
+    }
   }
 
   private fun removeFavorite(event: EventPreview) {
     viewModelScope.launch {
-      repo.removeFavEvent(event)
-      setState { copy(favorites = favorites.filter { it.id != event.id }) }
-      sendEffect(FavoritesContract.Effect.ShowToast("Event removed from favorites."))
+      val (updatedEvent, error) = repo.removeFavEvent(event)
+
+      if (error != null) {
+        setState {
+          copy(error = "Failed to remove event from favorites.")
+        }
+      } else {
+        setState {
+          copy(
+            events = events
+              .map {
+                if (it.id == updatedEvent.id) updatedEvent
+                else it
+              }
+              .filter { it.isFavorite }
+          )
+        }
+        sendEffect(FavoritesContract.Effect.ShowToast("Event removed from favorites."))
+      }
     }
   }
 }

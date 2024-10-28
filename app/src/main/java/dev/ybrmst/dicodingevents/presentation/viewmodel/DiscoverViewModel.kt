@@ -27,10 +27,6 @@ class DiscoverViewModel @Inject constructor(
 
   override fun add(event: DiscoverContract.Event) {
     when (event) {
-      is DiscoverContract.Event.OnEventClicked -> {
-        navigateToDetail(event.eventId)
-      }
-
       is DiscoverContract.Event.OnFetching -> {
         updateStateForCategory(
           category = event.category,
@@ -45,28 +41,6 @@ class DiscoverViewModel @Inject constructor(
           isRefreshing = true
         )
         fetchEvents(category = event.category)
-      }
-
-      DiscoverContract.Event.OnScreenChanged -> {
-        updateStateForCategory(
-          category = DiscoverContract.EventCategory.UPCOMING,
-          isFetching = false,
-          isRefreshing = false,
-          isSearching = false,
-          searchQuery = null
-        )
-        updateStateForCategory(
-          category = DiscoverContract.EventCategory.FINISHED,
-          isFetching = false,
-          isRefreshing = false,
-          isSearching = false,
-          searchQuery = null
-        )
-
-        viewModelScope.launch {
-          fetchEvents(category = DiscoverContract.EventCategory.UPCOMING)
-          fetchEvents(category = DiscoverContract.EventCategory.FINISHED)
-        }
       }
 
       is DiscoverContract.Event.OnSearchQueryChanged -> {
@@ -129,10 +103,6 @@ class DiscoverViewModel @Inject constructor(
     }
   }
 
-  private fun navigateToDetail(eventId: Int) {
-    sendEffect(DiscoverContract.Effect.NavigateToEventDetail(eventId))
-  }
-
   private fun toggleFavorite(
     event: EventPreview,
     category: DiscoverContract.EventCategory,
@@ -164,6 +134,13 @@ class DiscoverViewModel @Inject constructor(
           events = updatedEvents
         )
       }
+
+      sendEffect(
+        DiscoverContract.Effect.ShowToast(
+          if (updatedEvent.isFavorite) "Event added to favorites."
+          else "Event removed from favorites."
+        )
+      )
     }
   }
 

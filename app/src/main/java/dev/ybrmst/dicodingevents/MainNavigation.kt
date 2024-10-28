@@ -8,18 +8,15 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navigation
 import androidx.navigation.toRoute
+import dev.ybrmst.dicodingevents.presentation.ui.composables.scopedViewModel
 import dev.ybrmst.dicodingevents.presentation.ui.composables.screens.EventDetailScreen
 import dev.ybrmst.dicodingevents.presentation.ui.composables.screens.MainScreen
-import dev.ybrmst.dicodingevents.presentation.viewmodel.DiscoverViewModel
 import dev.ybrmst.dicodingevents.presentation.viewmodel.FavoritesViewModel
-import dev.ybrmst.dicodingevents.presentation.viewmodel.HomeViewModel
-import dev.ybrmst.dicodingevents.presentation.viewmodel.SettingsViewModel
 import kotlinx.serialization.Serializable
 
 @Composable
@@ -28,44 +25,40 @@ fun MainNavigation() {
 
   NavHost(
     navController = navController,
-    startDestination = AppRoute.MainPage
+    startDestination = AppRoute.IndexPage
   ) {
-    composable<AppRoute.MainPage> { backStackEntry ->
-      val parentEntry = remember(backStackEntry) {
-        navController.getBackStackEntry(AppRoute.MainPage)
+    navigation<AppRoute.IndexPage>(startDestination = AppRoute.MainPage) {
+      composable<AppRoute.MainPage> { navBackStackEntry ->
+        MainScreen(
+          favsVm = navBackStackEntry.scopedViewModel(navController),
+          onEventClick = {
+            navController.navigate(AppRoute.EventDetailPage(it.id))
+          },
+        )
       }
 
-      val homeVm: HomeViewModel = hiltViewModel(parentEntry)
-      val discoverVm: DiscoverViewModel = hiltViewModel(parentEntry)
-      val favsVm: FavoritesViewModel = hiltViewModel(parentEntry)
-      val settingsVm: SettingsViewModel = hiltViewModel(parentEntry)
+      composable<AppRoute.EventDetailPage>(
+        enterTransition = { scaleIntoContainer() },
+        exitTransition = { scaleOutOfContainer(ScaleTransition.INWARDS) },
+        popEnterTransition = { scaleIntoContainer(ScaleTransition.OUTWARDS) },
+        popExitTransition = { scaleOutOfContainer() }
+      ) {
+        val eventId = it.toRoute<AppRoute.EventDetailPage>().eventId
+        val favsVm: FavoritesViewModel = it.scopedViewModel(navController)
 
-      MainScreen(
-        navController = navController,
-        homeVm = homeVm,
-        discoverVm = discoverVm,
-        favsVm = favsVm,
-        settingsVm = settingsVm
-      )
-    }
-
-    composable<AppRoute.EventDetailPage>(
-      enterTransition = { scaleIntoContainer() },
-      exitTransition = { scaleOutOfContainer(ScaleTransition.INWARDS) },
-      popEnterTransition = { scaleIntoContainer(ScaleTransition.OUTWARDS) },
-      popExitTransition = { scaleOutOfContainer() }
-    ) {
-      val eventId = it.toRoute<AppRoute.EventDetailPage>().eventId
-
-      EventDetailScreen(
-        eventId = eventId,
-        navController = navController,
-      )
+        EventDetailScreen(
+          eventId = eventId,
+          navController = navController,
+        )
+      }
     }
   }
 }
 
 sealed class AppRoute {
+  @Serializable
+  data object IndexPage : AppRoute()
+
   @Serializable
   data object MainPage : AppRoute()
 

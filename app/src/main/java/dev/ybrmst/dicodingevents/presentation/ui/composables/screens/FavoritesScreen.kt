@@ -9,11 +9,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -24,24 +22,20 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
-import dev.ybrmst.dicodingevents.AppRoute
 import dev.ybrmst.dicodingevents.domain.models.EventPreview
 import dev.ybrmst.dicodingevents.presentation.ui.composables.atoms.EmptyItemsFallback
 import dev.ybrmst.dicodingevents.presentation.ui.composables.atoms.ErrorFallback
 import dev.ybrmst.dicodingevents.presentation.ui.composables.atoms.EventPreviewListItem
-import dev.ybrmst.dicodingevents.presentation.ui.composables.atoms.ShimmerItem
 import dev.ybrmst.dicodingevents.presentation.ui.composables.rememberFlowWithLifecycle
 import dev.ybrmst.dicodingevents.presentation.ui.theme.AppTheme
 import dev.ybrmst.dicodingevents.presentation.viewmodel.FavoritesContract
 import dev.ybrmst.dicodingevents.presentation.viewmodel.FavoritesViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FavoritesScreen(
   modifier: Modifier = Modifier,
-  navController: NavController,
-  vm: FavoritesViewModel = hiltViewModel()
+  vm: FavoritesViewModel = hiltViewModel(),
+  onEventClick: (EventPreview) -> Unit = {},
 ) {
   val state by vm.state.collectAsStateWithLifecycle()
   val effect = rememberFlowWithLifecycle(vm.effect)
@@ -50,9 +44,6 @@ fun FavoritesScreen(
   LaunchedEffect(effect) {
     effect.collect { action ->
       when (action) {
-        is FavoritesContract.Effect.NavigateToDetail -> {
-          navController.navigate(AppRoute.EventDetailPage(action.eventId))
-        }
         is FavoritesContract.Effect.ShowToast -> {
           Toast.makeText(
             context,
@@ -64,31 +55,23 @@ fun FavoritesScreen(
     }
   }
 
-  PullToRefreshBox(
-    isRefreshing = state.isRefreshing,
-    onRefresh = { vm.add(FavoritesContract.Event.OnRefresh) },
-    modifier = Modifier.fillMaxSize()
-  ) {
-    FavoritesScreenContent(
-      modifier = modifier.fillMaxSize(),
-      events = state.favorites,
-      isLoading = state.isFetching,
-      hasError = state.error != null,
-      error = state.error,
-      onRetry = { vm.add(FavoritesContract.Event.OnRefresh) },
-      onEventClick = { vm.add(FavoritesContract.Event.OnEventClicked(it.id)) },
-      onFavoriteClick = {
-        vm.add(FavoritesContract.Event.OnEventRemoved(it))
-      }
-    )
-  }
+  FavoritesScreenContent(
+    modifier = modifier.fillMaxSize(),
+    events = state.events,
+    hasError = state.error != null,
+    error = state.error,
+    onRetry = { vm.add(FavoritesContract.Event.OnFetch) },
+    onEventClick = onEventClick,
+    onFavoriteClick = {
+      vm.add(FavoritesContract.Event.OnEventRemoved(it))
+    }
+  )
 }
 
 @Composable
 fun FavoritesScreenContent(
   modifier: Modifier = Modifier,
   events: List<EventPreview>,
-  isLoading: Boolean,
   hasError: Boolean,
   error: String?,
   onRetry: () -> Unit,
@@ -96,7 +79,7 @@ fun FavoritesScreenContent(
   onFavoriteClick: (EventPreview) -> Unit,
 ) {
   Box(modifier = modifier.fillMaxSize()) {
-    if (!isLoading && !hasError) {
+    if (!hasError) {
       if (events.isEmpty()) {
         EmptyItemsFallback(
           onRefresh = onRetry,
@@ -114,13 +97,6 @@ fun FavoritesScreenContent(
             )
           }
         }
-      }
-    }
-
-    if (isLoading) {
-      LazyColumn {
-        buildHeadline()
-        items(events) { ShimmerItem() }
       }
     }
 
@@ -167,7 +143,6 @@ private fun FavoritesScreenPreview() {
       FavoritesScreenContent(
         modifier = Modifier.padding(innerPadding),
         events = events,
-        isLoading = false,
         hasError = false,
         error = null,
         onRetry = {},
@@ -194,7 +169,6 @@ private fun FavoritesScreenLoadingPreview() {
       FavoritesScreenContent(
         modifier = Modifier.padding(innerPadding),
         events = events,
-        isLoading = true,
         hasError = false,
         error = null,
         onRetry = {},

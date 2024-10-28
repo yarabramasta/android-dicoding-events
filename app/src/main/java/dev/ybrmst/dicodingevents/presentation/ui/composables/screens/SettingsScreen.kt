@@ -62,8 +62,8 @@ fun SettingsScreenContent(
   isOptInDailyNotif: Boolean,
   onToggleOptInDailyNotif: () -> Unit,
 ) {
-  var darkMode by remember { mutableStateOf(isDarkMode) }
-  var dailyNotifOptIn by remember { mutableStateOf(isOptInDailyNotif) }
+  var darkMode by remember(isDarkMode) { mutableStateOf(isDarkMode) }
+  var dailyNotifOptIn by remember(isOptInDailyNotif) { mutableStateOf(isOptInDailyNotif) }
 
   LazyColumn(modifier = modifier.fillMaxSize()) {
     item {
@@ -110,7 +110,7 @@ fun SettingsScreenContent(
             checked = darkMode,
             onCheckedChange = {
               onChangeDarkMode(it)
-              darkMode = it
+//              darkMode = it
             }
           )
         }
@@ -142,7 +142,7 @@ fun SettingsScreenContent(
             checked = dailyNotifOptIn,
             onCheckedChange = {
               onToggleOptInDailyNotif()
-              dailyNotifOptIn = it
+//              dailyNotifOptIn = it
             }
           )
         }

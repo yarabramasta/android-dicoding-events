@@ -28,8 +28,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
-import dev.ybrmst.dicodingevents.AppRoute
 import dev.ybrmst.dicodingevents.domain.models.EventPreview
 import dev.ybrmst.dicodingevents.presentation.ui.composables.atoms.EmptyItemsFallback
 import dev.ybrmst.dicodingevents.presentation.ui.composables.atoms.ErrorFallback
@@ -38,7 +36,10 @@ import dev.ybrmst.dicodingevents.presentation.ui.composables.atoms.EventPreviewL
 import dev.ybrmst.dicodingevents.presentation.ui.composables.atoms.ShimmerBox
 import dev.ybrmst.dicodingevents.presentation.ui.composables.atoms.ShimmerItem
 import dev.ybrmst.dicodingevents.presentation.ui.composables.rememberFlowWithLifecycle
+import dev.ybrmst.dicodingevents.presentation.ui.composables.rememberUpdatedFavoriteStatus
 import dev.ybrmst.dicodingevents.presentation.ui.theme.AppTheme
+import dev.ybrmst.dicodingevents.presentation.viewmodel.FavoritesContract
+import dev.ybrmst.dicodingevents.presentation.viewmodel.FavoritesViewModel
 import dev.ybrmst.dicodingevents.presentation.viewmodel.HomeContract
 import dev.ybrmst.dicodingevents.presentation.viewmodel.HomeViewModel
 
@@ -46,10 +47,10 @@ import dev.ybrmst.dicodingevents.presentation.viewmodel.HomeViewModel
 @Composable
 fun HomeScreen(
   modifier: Modifier = Modifier,
-  navController: NavController,
-  vm: HomeViewModel = hiltViewModel()
+  vm: HomeViewModel = hiltViewModel(),
+  favsVm: FavoritesViewModel,
+  onEventClick: (EventPreview) -> Unit = {},
 ) {
-
   val state by vm.state.collectAsStateWithLifecycle()
   val effect = rememberFlowWithLifecycle(vm.effect)
   val context = LocalContext.current
@@ -57,10 +58,6 @@ fun HomeScreen(
   LaunchedEffect(effect) {
     effect.collect { action ->
       when (action) {
-        is HomeContract.Effect.NavigateToDetail -> {
-          navController.navigate(AppRoute.EventDetailPage(action.eventId))
-        }
-
         is HomeContract.Effect.ShowToast -> {
           Toast.makeText(
             context,
@@ -72,6 +69,16 @@ fun HomeScreen(
     }
   }
 
+  val favs by favsVm.state.collectAsStateWithLifecycle()
+  val upcomingEvents = rememberUpdatedFavoriteStatus(
+    state.upcomingEvents,
+    favs.events
+  )
+  val finishedEvents = rememberUpdatedFavoriteStatus(
+    state.finishedEvents,
+    favs.events
+  )
+
   PullToRefreshBox(
     isRefreshing = state.isRefreshing,
     onRefresh = { vm.add(HomeContract.Event.OnRefresh) },
@@ -79,19 +86,22 @@ fun HomeScreen(
   ) {
     HomeScreenContent(
       modifier = modifier.fillMaxSize(),
-      upcomingEvents = state.upcomingEvents,
-      finishedEvents = state.finishedEvents,
+      upcomingEvents = upcomingEvents,
+      finishedEvents = finishedEvents,
       isLoading = state.isFetching || state.isRefreshing,
       hasError = state.error != null,
       error = state.error,
       onRetry = {
         vm.add(HomeContract.Event.OnRefresh)
       },
-      onEventClick = { eventId ->
-        vm.add(HomeContract.Event.OnEventClicked(eventId))
-      },
-      onFavoriteClick = { eventId ->
-        vm.add(HomeContract.Event.OnEventFavoriteChanged(eventId))
+      onEventClick = onEventClick,
+      onFavoriteClick = { event ->
+        if (event.isFavorite) {
+          favsVm.add(FavoritesContract.Event.OnEventRemoved(event))
+        } else {
+          favsVm.add(FavoritesContract.Event.OnEventAdded(event))
+        }
+        vm.add(HomeContract.Event.OnFavoriteChanged(event.isFavorite))
       },
     )
   }
@@ -106,7 +116,7 @@ private fun HomeScreenContent(
   onRetry: () -> Unit,
   upcomingEvents: List<EventPreview>,
   finishedEvents: List<EventPreview>,
-  onEventClick: (Int) -> Unit,
+  onEventClick: (EventPreview) -> Unit,
   onFavoriteClick: (EventPreview) -> Unit,
 ) {
   Box(modifier = modifier.fillMaxSize()) {
@@ -119,7 +129,7 @@ private fun HomeScreenContent(
           buildUpcomingEventsLayout(upcomingEvents) { event ->
             EventPreviewCard(
               event = event,
-              onClick = { onEventClick(event.id) },
+              onClick = onEventClick,
               onFavoriteClick = { onFavoriteClick(event) },
               isFavorite = event.isFavorite
             )
@@ -127,7 +137,7 @@ private fun HomeScreenContent(
           buildFinishedEventsLayout(finishedEvents) { event ->
             EventPreviewListItem(
               event = event,
-              onClick = { onEventClick(event.id) },
+              onClick = onEventClick,
               onFavoriteClick = { onFavoriteClick(event) },
               isFavorite = event.isFavorite
             )

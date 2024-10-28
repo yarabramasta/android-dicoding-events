@@ -5,7 +5,6 @@ import com.skydoves.sandwich.messageOrNull
 import com.skydoves.sandwich.onFailure
 import com.skydoves.sandwich.onSuccess
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dev.ybrmst.dicodingevents.domain.models.EventPreview
 import dev.ybrmst.dicodingevents.domain.repositories.EventsRepository
 import dev.ybrmst.dicodingevents.lib.BaseViewModel
 import kotlinx.coroutines.launch
@@ -26,23 +25,19 @@ class HomeViewModel @Inject constructor(
         setState { copy(isFetching = true, isRefreshing = false) }
         fetchEvents()
       }
+
       HomeContract.Event.OnRefresh -> {
         setState { copy(isRefreshing = true, isFetching = false) }
         fetchEvents()
       }
-      is HomeContract.Event.OnEventClicked -> navigateToDetail(event.eventId)
 
-      is HomeContract.Event.OnEventFavoriteChanged -> toggleFavorite(event.event)
-
-      HomeContract.Event.OnScreenChanged -> {
-        setState {
-          copy(
-            isFetching = false,
-            isRefreshing = false,
-            error = null
+      is HomeContract.Event.OnFavoriteChanged -> {
+        sendEffect(
+          HomeContract.Effect.ShowToast(
+            if (event.isFavorite) "Event removed from favorites"
+            else "Event added to favorites"
           )
-        }
-        fetchEvents()
+        )
       }
     }
   }
@@ -77,42 +72,5 @@ class HomeViewModel @Inject constructor(
           }
       }
     }
-  }
-
-  private fun navigateToDetail(eventId: Int) {
-    sendEffect(HomeContract.Effect.NavigateToDetail(eventId))
-  }
-
-  private fun toggleFavorite(event: EventPreview) {
-    viewModelScope.launch {
-      val (updatedEvent, error) =
-        if (event.isFavorite) repo.removeFavEvent(event)
-        else repo.addFavEvent(event)
-
-      if (error != null) {
-        sendEffect(HomeContract.Effect.ShowToast("Failed to add event to favorites."))
-      } else {
-        setState {
-          copy(
-            upcomingEvents = updateEventList(upcomingEvents, updatedEvent),
-            finishedEvents = updateEventList(finishedEvents, updatedEvent)
-          )
-        }
-
-        sendEffect(
-          HomeContract.Effect.ShowToast(
-            if (updatedEvent.isFavorite) "Event added to favorites."
-            else "Event removed from favorites."
-          )
-        )
-      }
-    }
-  }
-
-  private fun updateEventList(
-    events: List<EventPreview>,
-    updatedEvent: EventPreview,
-  ): List<EventPreview> = events.map {
-    if (it.id == updatedEvent.id) updatedEvent else it
   }
 }

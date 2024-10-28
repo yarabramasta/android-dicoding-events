@@ -7,13 +7,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 
-
-data class BottomNavItem(
-  val label: String,
-  val selectedIcon: ImageVector,
-  val icon: ImageVector,
-)
-
 @Composable
 fun MainScreenBottomNavBar(
   items: List<BottomNavItem>,
@@ -36,3 +29,9 @@ fun MainScreenBottomNavBar(
     }
   }
 }
+
+data class BottomNavItem(
+  val label: String,
+  val selectedIcon: ImageVector,
+  val icon: ImageVector,
+)

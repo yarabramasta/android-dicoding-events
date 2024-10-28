@@ -8,38 +8,21 @@ class FavoritesContract : ViewModelContract {
 
   @Immutable
   data class State(
-    val favorites: List<EventPreview>,
-    val isFetching: Boolean,
-    val isRefreshing: Boolean,
+    val events: List<EventPreview>,
     val error: String? = null,
   ) : ViewModelContract.State {
     companion object {
-      private val events = listOf(
-        EventPreview.fake(),
-        EventPreview.fake(),
-        EventPreview.fake(),
-        EventPreview.fake(),
-        EventPreview.fake(),
-      ).distinctBy { it.id }
-
-      fun initial() = State(
-        favorites = events,
-        isFetching = false,
-        isRefreshing = false,
-      )
+      fun initial() = State(events = emptyList())
     }
   }
 
   sealed class Event : ViewModelContract.Event {
     data object OnFetch : Event()
-    data object OnRefresh : Event()
-    data class OnEventClicked(val eventId: Int) : Event()
+    data class OnEventAdded(val event: EventPreview) : Event()
     data class OnEventRemoved(val event: EventPreview) : Event()
-    data object OnScreenChanged : Event()
   }
 
   sealed class Effect : ViewModelContract.Effect {
-    data class NavigateToDetail(val eventId: Int) : Effect()
     data class ShowToast(val message: String) : Effect()
   }
 }
