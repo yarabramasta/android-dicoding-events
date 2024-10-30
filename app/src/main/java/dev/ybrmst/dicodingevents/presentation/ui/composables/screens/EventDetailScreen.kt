@@ -375,15 +375,17 @@ fun LazyListScope.buildContent(event: EventDetail) {
         style = MaterialTheme.typography.titleLarge,
         fontWeight = FontWeight.SemiBold,
         color = MaterialTheme.colorScheme.primary,
-        maxLines = 2,
-        overflow = TextOverflow.Ellipsis,
+        modifier = Modifier.padding(bottom = 4.dp)
+      )
+      Text(
+        "By ${event.ownerName}",
+        color = MaterialTheme.colorScheme.tertiary,
+        style = MaterialTheme.typography.bodyMedium,
         modifier = Modifier.padding(bottom = 8.dp)
       )
       Text(
         event.summary,
-        maxLines = 3,
         color = MaterialTheme.colorScheme.outline,
-        overflow = TextOverflow.Ellipsis,
       )
     }
     Spacer(modifier = Modifier.height(16.dp))
